@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import {
   User, Mail, Shield, Flame, LogOut, Save, Check,
   GraduationCap, Heart, UserCheck, ChevronRight,
-  Wallet, Sparkles, AlertTriangle, X
+  Wallet, Sparkles, AlertTriangle, X, CreditCard, History
 } from 'lucide-react';
 
-export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, onLogout }) {
+export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, onLogout, setActiveTab }) {
   const [monthlyLimit, setMonthlyLimit] = useState(profile?.monthly_limit || 0);
   const [aiCharacter, setAiCharacter] = useState(profile?.ai_character || 'Dosen Killer');
   const [aiSpiciness, setAiSpiciness] = useState(profile?.ai_spiciness || 'Sedang');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showSettings, setShowSettings] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const formatNumber = (val) => {
     const num = val.toString().replace(/\D/g, '');
@@ -88,197 +98,269 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
       )}
 
       {/* Header */}
-      <div style={styles.header}>
-        <h2 style={styles.title}>Profil & Pengaturan</h2>
-        <p style={styles.subtitle}>Kelola akun dan preferensi AI kamu</p>
-      </div>
+      {(!isMobile || showSettings) && (
+        <div style={styles.header}>
+          <h2 style={styles.title}>
+            {isMobile ? (
+              <button onClick={() => setShowSettings(false)} style={styles.backBtn}>
+                <ChevronRight size={20} style={{ transform: 'rotate(180deg)', marginRight: 4 }} />
+                Kembali
+              </button>
+            ) : "Profil & Pengaturan"}
+          </h2>
+          {!isMobile && <p style={styles.subtitle}>Kelola akun dan preferensi AI kamu</p>}
+        </div>
+      )}
 
-      <div style={styles.grid}>
-        {/* Left Column — User Info + Logout */}
-        <div style={styles.leftCol}>
-          {/* User Card */}
-          <div className="card" style={styles.userCard}>
-            <div style={styles.avatarBig}>{avatarLetter}</div>
-            <h3 style={styles.displayName}>{displayName}</h3>
-            <p style={styles.emailText}>
-              <Mail size={13} style={{ marginRight: 4 }} />
-              {user?.email || '—'}
-            </p>
-            {isDemo && (
-              <span style={styles.demoPill}>Mode Demo</span>
-            )}
-            <div style={styles.divider} />
-            <div style={styles.infoRow}>
-              <Shield size={14} color="var(--color-primary)" />
-              <span style={styles.infoLabel}>Status Akun</span>
-              <span style={styles.infoBadge}>Aktif</span>
+      {isMobile && !showSettings ? (
+        /* Mobile Menu Hub */
+        <div style={styles.mobileHub}>
+          {/* Komponen Profil (Bagian Atas) - Avatar kotak rounded */}
+          <div 
+            onClick={() => setShowSettings(true)}
+            style={styles.mobileProfileCard}
+          >
+            <div style={styles.avatarRoundedSquare}>{avatarLetter}</div>
+            <div style={styles.mobileProfileInfo}>
+              <h3 style={styles.mobileDisplayName}>{displayName}</h3>
+              <p style={styles.mobileEmailText}>
+                <Mail size={13} style={{ marginRight: 4 }} />
+                {user?.email || '—'}
+              </p>
+              <span style={styles.mobilePill}>Lihat Pengaturan &gt;</span>
             </div>
-            <div style={styles.infoRow}>
-              <Sparkles size={14} color="var(--color-accent)" />
-              <span style={styles.infoLabel}>Karakter AI</span>
-              <span style={{ ...styles.infoBadge, backgroundColor: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-                {aiCharacter}
-              </span>
-            </div>
-            <div style={styles.infoRow}>
-              <Flame size={14} color="#ef4444" />
-              <span style={styles.infoLabel}>Level Pedes</span>
-              <span style={{ ...styles.infoBadge, backgroundColor: '#fee2e2', color: '#ef4444' }}>
-                {aiSpiciness}
-              </span>
-            </div>
+            <ChevronRight size={20} color="var(--text-muted)" />
           </div>
 
-          {/* Logout Button */}
+          {/* Menu Navigasi & Action (Bagian Bawah) */}
+          <div style={styles.mobileMenuList}>
+            <button 
+              onClick={() => setShowSettings(true)}
+              style={styles.mobileMenuItem}
+            >
+              <CreditCard size={18} style={styles.mobileMenuIcon} />
+              <span style={styles.mobileMenuLabel}>Pengaturan Akun</span>
+              <ChevronRight size={16} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('Riwayat')}
+              style={styles.mobileMenuItem}
+            >
+              <History size={18} style={styles.mobileMenuIcon} />
+              <span style={styles.mobileMenuLabel}>Riwayat Transaksi</span>
+              <ChevronRight size={16} style={{ marginLeft: 'auto', color: 'var(--text-muted)' }} />
+            </button>
+          </div>
+
+          {/* Tombol Keluar dari Akun */}
           <button
             onClick={() => setShowLogoutConfirm(true)}
-            style={styles.logoutBtn}
+            style={styles.mobileLogoutBtn}
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             <span>Keluar dari Akun</span>
-            <ChevronRight size={16} style={{ marginLeft: 'auto' }} />
           </button>
         </div>
-
-        {/* Right Column — Settings */}
-        <div style={styles.rightCol}>
-          {/* Budget Setting */}
-          <div className="card" style={styles.settingCard}>
-            <div style={styles.settingHeader}>
-              <Wallet size={20} color="var(--color-primary)" />
-              <div>
-                <h4 style={styles.settingTitle}>Budget Bulanan</h4>
-                <p style={styles.settingDesc}>Limit pengeluaran bulananmu</p>
+      ) : (
+        /* Desktop Layout or Mobile Detailed Settings View */
+        <div style={isMobile ? styles.mobileSettingsContainer : styles.grid}>
+          {/* Left Column — User Info + Logout (Desktop only) */}
+          {!isMobile && (
+            <div style={styles.leftCol}>
+              {/* User Card */}
+              <div className="card" style={styles.userCard}>
+                <div style={styles.avatarBig}>{avatarLetter}</div>
+                <h3 style={styles.displayName}>{displayName}</h3>
+                <p style={styles.emailText}>
+                  <Mail size={13} style={{ marginRight: 4 }} />
+                  {user?.email || '—'}
+                </p>
+                {isDemo && (
+                  <span style={styles.demoPill}>Mode Demo</span>
+                )}
+                <div style={styles.divider} />
+                <div style={styles.infoRow}>
+                  <Shield size={14} color="var(--color-primary)" />
+                  <span style={styles.infoLabel}>Status Akun</span>
+                  <span style={styles.infoBadge}>Aktif</span>
+                </div>
+                <div style={styles.infoRow}>
+                  <Sparkles size={14} color="var(--color-accent)" />
+                  <span style={styles.infoLabel}>Karakter AI</span>
+                  <span style={{ ...styles.infoBadge, backgroundColor: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+                    {aiCharacter}
+                  </span>
+                </div>
+                <div style={styles.infoRow}>
+                  <Flame size={14} color="#ef4444" />
+                  <span style={styles.infoLabel}>Level Pedes</span>
+                  <span style={{ ...styles.infoBadge, backgroundColor: '#fee2e2', color: '#ef4444' }}>
+                    {aiSpiciness}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div style={{
-              ...styles.budgetInputWrap,
-              borderColor: isBelowMin ? '#ef4444' : 'var(--color-primary)',
-            }}>
-              <span style={styles.budgetPrefix}>Rp</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={monthlyLimit === 0 ? '' : formatNumber(monthlyLimit)}
-                placeholder="0"
-                onChange={handleLimitChange}
-                style={styles.budgetInput}
-              />
-            </div>
-            {isBelowMin && (
-              <p style={{ fontSize: '12px', color: '#ef4444', fontWeight: '600', marginBottom: '10px' }}>
-                ⚠️ Budget terlalu kecil! Minimal Rp 10.000 ya.
-              </p>
-            )}
-            <div style={styles.quickBudgets}>
-              {[500000, 1000000, 2000000, 5000000].map(amt => (
-                <button
-                  key={amt}
-                  onClick={() => setMonthlyLimit(amt)}
-                  style={{
-                    ...styles.quickBtn,
-                    backgroundColor: Number(monthlyLimit) === amt ? 'var(--color-primary)' : 'var(--bg-tertiary)',
-                    color: Number(monthlyLimit) === amt ? 'white' : 'var(--text-muted)',
-                    fontWeight: Number(monthlyLimit) === amt ? 700 : 500,
-                  }}
-                >
-                  {amt >= 1000000 ? `${amt / 1000000}Jt` : `${amt / 1000}K`}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* Karakter AI */}
-          <div className="card" style={styles.settingCard}>
-            <div style={styles.settingHeader}>
-              <Sparkles size={20} color="var(--color-accent)" />
-              <div>
-                <h4 style={styles.settingTitle}>Karakter AI</h4>
-                <p style={styles.settingDesc}>Kepribadian asisten keuanganmu</p>
-              </div>
+              {/* Logout Button */}
+              <button
+                onClick={() => setShowLogoutConfirm(true)}
+                style={styles.logoutBtn}
+              >
+                <LogOut size={18} />
+                <span>Keluar dari Akun</span>
+                <ChevronRight size={16} style={{ marginLeft: 'auto' }} />
+              </button>
             </div>
-            <div style={styles.personaGrid}>
-              {personas.map(p => {
-                const Icon = p.icon;
-                const isActive = aiCharacter === p.id;
-                return (
+          )}
+
+          {/* Right Column — Settings */}
+          <div style={styles.rightCol}>
+            {/* Budget Setting */}
+            <div className="card" style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <Wallet size={20} color="var(--color-primary)" />
+                <div>
+                  <h4 style={styles.settingTitle}>Budget Bulanan</h4>
+                  <p style={styles.settingDesc}>Limit pengeluaran bulananmu</p>
+                </div>
+              </div>
+              <div style={{
+                ...styles.budgetInputWrap,
+                borderColor: isBelowMin ? '#ef4444' : 'var(--color-primary)',
+              }}>
+                <span style={styles.budgetPrefix}>Rp</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={monthlyLimit === 0 ? '' : formatNumber(monthlyLimit)}
+                  placeholder="0"
+                  onChange={handleLimitChange}
+                  style={styles.budgetInput}
+                />
+              </div>
+              {isBelowMin && (
+                <p style={{ fontSize: '12px', color: '#ef4444', fontWeight: '600', marginBottom: '10px' }}>
+                  ⚠️ Budget terlalu kecil! Minimal Rp 10.000 ya.
+                </p>
+              )}
+              <div style={styles.quickBudgets}>
+                {[500000, 1000000, 2000000, 5000000].map(amt => (
                   <button
-                    key={p.id}
-                    onClick={() => setAiCharacter(p.id)}
+                    key={amt}
+                    onClick={() => setMonthlyLimit(amt)}
                     style={{
-                      ...styles.personaCard,
-                      borderColor: isActive ? 'var(--color-primary)' : 'var(--border-color)',
-                      backgroundColor: isActive ? 'var(--color-primary-light)' : 'var(--bg-secondary)',
+                      ...styles.quickBtn,
+                      backgroundColor: Number(monthlyLimit) === amt ? 'var(--color-primary)' : 'var(--bg-tertiary)',
+                      color: Number(monthlyLimit) === amt ? 'white' : 'var(--text-muted)',
+                      fontWeight: Number(monthlyLimit) === amt ? 700 : 500,
                     }}
                   >
-                    <Icon size={22} color={isActive ? 'var(--color-primary-dark)' : 'var(--text-muted)'} />
-                    <span style={{ ...styles.personaLabel, color: isActive ? 'var(--color-primary-dark)' : 'var(--text-main)' }}>
-                      {p.label}
-                    </span>
-                    <span style={styles.personaDesc}>{p.desc}</span>
-                    {isActive && (
-                      <div style={styles.checkBadge}>
-                        <Check size={11} />
-                      </div>
-                    )}
+                    {amt >= 1000000 ? `${amt / 1000000}Jt` : `${amt / 1000}K`}
                   </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Level Pedas */}
-          <div className="card" style={styles.settingCard}>
-            <div style={styles.settingHeader}>
-              <Flame size={20} color="#ef4444" />
-              <div>
-                <h4 style={styles.settingTitle}>Level Pedes AI</h4>
-                <p style={styles.settingDesc}>Seberapa pedas roasting AI ke kamu</p>
+                ))}
               </div>
             </div>
-            <div style={styles.spicyList}>
-              {spicinesses.map(s => {
-                const isActive = aiSpiciness === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => setAiSpiciness(s.id)}
-                    style={{
-                      ...styles.spicyRow,
-                      borderColor: isActive ? '#ef4444' : 'var(--border-color)',
-                      backgroundColor: isActive ? '#fff1f2' : 'var(--bg-secondary)',
-                    }}
-                  >
-                    <div>
-                      <div style={{ ...styles.spicyLabel, color: isActive ? '#ef4444' : 'var(--text-main)' }}>
-                        {s.label}
-                      </div>
-                      <div style={styles.spicyDesc}>{s.desc}</div>
-                    </div>
-                    {isActive && <Check size={16} color="#ef4444" />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="btn btn-primary"
-            style={styles.saveBtn}
-          >
-            {saving ? (
-              <span>Menyimpan...</span>
-            ) : saved ? (
-              <><Check size={18} /> Tersimpan!</>
-            ) : (
-              <><Save size={18} /> Simpan Perubahan</>
-            )}
-          </button>
+            {/* Karakter AI */}
+            <div className="card" style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <Sparkles size={20} color="var(--color-accent)" />
+                <div>
+                  <h4 style={styles.settingTitle}>Karakter AI</h4>
+                  <p style={styles.settingDesc}>Kepribadian asisten keuanganmu</p>
+                </div>
+              </div>
+              <div style={{
+                ...styles.personaGrid,
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)'
+              }}>
+                {personas.map(p => {
+                  const Icon = p.icon;
+                  const isActive = aiCharacter === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setAiCharacter(p.id)}
+                      style={{
+                        ...styles.personaCard,
+                        borderColor: isActive ? 'var(--color-primary)' : 'var(--border-color)',
+                        backgroundColor: isActive ? 'var(--color-primary-light)' : 'var(--bg-secondary)',
+                      }}
+                    >
+                      <Icon size={22} color={isActive ? 'var(--color-primary-dark)' : 'var(--text-muted)'} />
+                      <span style={{ ...styles.personaLabel, color: isActive ? 'var(--color-primary-dark)' : 'var(--text-main)' }}>
+                        {p.label}
+                      </span>
+                      <span style={styles.personaDesc}>{p.desc}</span>
+                      {isActive && (
+                        <div style={styles.checkBadge}>
+                          <Check size={11} />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Level Pedas */}
+            <div className="card" style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <Flame size={20} color="#ef4444" />
+                <div>
+                  <h4 style={styles.settingTitle}>Level Pedes AI</h4>
+                  <p style={styles.settingDesc}>Seberapa pedas roasting AI ke kamu</p>
+                </div>
+              </div>
+              <div style={styles.spicyList}>
+                {spicinesses.map(s => {
+                  const isActive = aiSpiciness === s.id;
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => setAiSpiciness(s.id)}
+                      style={{
+                        ...styles.spicyRow,
+                        borderColor: isActive ? '#ef4444' : 'var(--border-color)',
+                        backgroundColor: isActive ? '#fff1f2' : 'var(--bg-secondary)',
+                      }}
+                    >
+                      <div>
+                        <div style={{ ...styles.spicyLabel, color: isActive ? '#ef4444' : 'var(--text-main)' }}>
+                          {s.label}
+                        </div>
+                        <div style={styles.spicyDesc}>{s.desc}</div>
+                      </div>
+                      {isActive && <Check size={16} color="#ef4444" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <button
+              onClick={async () => {
+                await handleSave();
+                if (isMobile) {
+                  setShowSettings(false);
+                }
+              }}
+              disabled={saving}
+              className="btn btn-primary"
+              style={styles.saveBtn}
+            >
+              {saving ? (
+                <span>Menyimpan...</span>
+              ) : saved ? (
+                <><Check size={18} /> Tersimpan!</>
+              ) : (
+                <><Save size={18} /> Simpan Perubahan</>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -380,6 +462,7 @@ const styles = {
     border: '2px solid', cursor: 'pointer',
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
     transition: 'all 0.2s', position: 'relative',
+    width: '100%',
   },
   personaLabel: { fontSize: '12px', fontWeight: '700', textAlign: 'center' },
   personaDesc: { fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' },
@@ -396,6 +479,7 @@ const styles = {
     padding: '14px 16px', borderRadius: '12px', border: '2px solid',
     cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
     alignItems: 'center', transition: 'all 0.2s',
+    width: '100%',
   },
   spicyLabel: { fontSize: '14px', fontWeight: '700', marginBottom: '2px' },
   spicyDesc: { fontSize: '12px', color: 'var(--text-muted)' },
@@ -440,4 +524,124 @@ const styles = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
     fontSize: '14px',
   },
+
+  // Mobile Hub Styles
+  mobileHub: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+    padding: '8px 4px',
+  },
+  mobileProfileCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    padding: '20px',
+    borderRadius: '16px',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--bg-secondary)',
+    cursor: 'pointer',
+    boxShadow: 'var(--shadow-sm)',
+    transition: 'all 0.2s',
+  },
+  avatarRoundedSquare: {
+    width: '60px', height: '60px', borderRadius: '16px',
+    background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))',
+    color: 'white', fontSize: '24px', fontWeight: '800',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(13,148,136,0.2)',
+  },
+  mobileProfileInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '4px',
+    flex: 1,
+  },
+  mobileDisplayName: {
+    fontSize: '16px',
+    fontWeight: '800',
+    margin: 0,
+    color: 'var(--text-main)',
+  },
+  mobileEmailText: {
+    fontSize: '12px',
+    color: 'var(--text-muted)',
+    display: 'flex',
+    alignItems: 'center',
+    margin: 0,
+  },
+  mobilePill: {
+    fontSize: '11px',
+    color: 'var(--color-primary)',
+    fontWeight: '700',
+    marginTop: '2px',
+  },
+  mobileMenuList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  mobileMenuItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px',
+    width: '100%',
+    borderRadius: '14px',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--bg-secondary)',
+    color: 'var(--text-main)',
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'all 0.2s',
+  },
+  mobileMenuIcon: {
+    color: 'var(--color-primary)',
+    flexShrink: 0,
+  },
+  mobileMenuLabel: {
+    fontSize: '14px',
+    fontWeight: '700',
+  },
+  mobileLogoutBtn: {
+    width: '100%',
+    padding: '14px',
+    borderRadius: '12px',
+    border: 'none',
+    backgroundColor: '#f1f5f9',
+    color: '#334155',
+    fontWeight: '700',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    transition: 'all 0.2s',
+    marginTop: '16px',
+  },
+  backBtn: {
+    background: 'none',
+    border: 'none',
+    color: 'var(--color-primary)',
+    fontSize: '18px',
+    fontWeight: '800',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: 0,
+  },
+  mobileSettingsHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '20px',
+  },
+  mobileSettingsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
 };
+

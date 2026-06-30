@@ -1,14 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Initialize Gemini GenAI
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-
-// A helper to check if Gemini key is configured
-const isGeminiConfigured = () => {
-  return apiKey && apiKey !== 'your-gemini-api-key' && apiKey.trim() !== '';
-};
-
-// Mock responses for smooth demonstration without API keys
+// Mock responses for smooth demonstration without API keys or during local fallback
 const MOCK_ROASTS = {
   'Dosen Killer': {
     'Manis': 'Saya melihat potensi pada keuangan Anda. Namun, jika Anda tidak mulai membatasi pengeluaran non-primer, target kelulusan finansial Anda bisa tertunda. Silakan revisi anggaran belanja Anda.',
@@ -42,63 +32,51 @@ const MOCK_OCR = {
   total: 78355
 };
 
-export const generateRoasting = async (limit, spent, recentTransactions, character = 'Dosen Killer', spiciness = 'Sedang') => {
-  if (!isGeminiConfigured()) {
-    // Return mock roasting based on configuration
-    const charRoasts = MOCK_ROASTS[character] || MOCK_ROASTS['Dosen Killer'];
-    return charRoasts[spiciness] || charRoasts['Sedang'];
-  }
-
+// Helper: parse backend error response, returns a user-friendly message string
+async function parseBackendError(response) {
   try {
-    const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const body = await response.json();
+    // Backend now returns { error: true, code, message }
+    if (body.code === 'QUOTA_EXCEEDED') {
+      return { isQuota: true, message: body.message };
+    }
+    return { isQuota: false, message: body.message || 'Server error' };
+  } catch {
+    return { isQuota: false, message: `HTTP ${response.status}` };
+  }
+}
 
-    const transactionsSummary = recentTransactions && recentTransactions.length > 0 
-      ? recentTransactions.map(t => `- ${t.title}: Rp ${Number(t.amount).toLocaleString('id-ID')} (${t.category})`).join('\n')
-      : 'Belum ada transaksi.';
+export const generateRoasting = async (limit, spent, recentTransactions, character = 'Dosen Killer', spiciness = 'Sedang') => {
+  try {
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'roasting',
+        data: { limit, spent, recentTransactions, character, spiciness }
+      })
+    });
 
-    const prompt = `
-Kamu adalah asisten keuangan bernama "StrukIn" dengan persona: "${character}".
-Gaya bahasa kamu harus disesuaikan dengan tingkat kepedasan roasting: "${spiciness}".
-- Manis: Berikan saran yang ramah, sopan, memotivasi, dan mendidik dengan gaya bahasa persona tersebut.
-- Sedang: Gunakan sindiran halus, sarkasme ringan, dan nasihat lucu tapi masuk akal.
-- Pedes Mampus: Lakukan roasting yang sangat tajam, sinis, sarkastik tanpa ampun, memarahi pemborosan pengguna secara blak-blakan namun tetap menghibur (tidak SARA atau kasar berlebihan).
+    if (!response.ok) {
+      const { isQuota, message } = await parseBackendError(response);
+      if (isQuota) {
+        // Return a quota-specific in-character message instead of crashing
+        return `⚠️ Kuota AI habis sementara. Ini pesan offline dari ${character}: "${MOCK_ROASTS[character]?.[spiciness] || MOCK_ROASTS['Dosen Killer'][spiciness]}"`;
+      }
+      throw new Error(message);
+    }
 
-Gunakan bahasa Indonesia yang santai, gaul, atau sesuai persona (misal Emak Bawel menggunakan bahasa khas ibu-ibu, Dosen menggunakan istilah akademis seperti "revisi", "sks", "silabus").
-
-Data Pengguna saat ini:
-- Limit Bulanan: Rp ${Number(limit).toLocaleString('id-ID')}
-- Total Terpakai: Rp ${Number(spent).toLocaleString('id-ID')}
-- Sisa Saldo: Rp ${Number(limit - spent).toLocaleString('id-ID')}
-- Survival Score (Kesehatan Keuangan): ${Math.max(0, Math.round(100 - (spent / limit * 100)))} HP
-
-Transaksi Terakhir:
-${transactionsSummary}
-
-Berikan respon singkat maksimal 3 kalimat saja. Langsung berikan responnya tanpa kata pengantar atau tanda kutip tambahan.
-`;
-
-    const result = await model.generateContent(prompt);
-    return result.response.text();
+    const resData = await response.json();
+    return resData.reply;
   } catch (error) {
-    console.error('Error generating roasting:', error);
+    console.error('Error generating roasting via backend:', error);
     const charRoasts = MOCK_ROASTS[character] || MOCK_ROASTS['Dosen Killer'];
     return charRoasts[spiciness] || charRoasts['Sedang'];
   }
 };
 
 export const parseReceiptOCR = async (imageFile) => {
-  if (!isGeminiConfigured()) {
-    // Artificial delay to simulate processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    return MOCK_OCR;
-  }
-
   try {
-    const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-    // Convert file to generative part
     const fileToGenerativePart = async (file) => {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -116,49 +94,54 @@ export const parseReceiptOCR = async (imageFile) => {
 
     const imagePart = await fileToGenerativePart(imageFile);
 
-    const prompt = `
-Analisis gambar struk belanja ini dan ekstrak informasinya ke dalam format JSON yang valid.
-Ekstrak data-data berikut:
-- merchantName: Nama toko/supermarket (misal: Indomaret, Alfamart)
-- items: Daftar item belanja yang dibeli. Setiap item memiliki:
-  - name: Nama produk (tulis dalam huruf kapital jika di struk demikian)
-  - price: Harga akhir produk setelah diskon per baris (nominal angka saja)
-- subtotal: Subtotal semua item sebelum pajak/diskon tambahan
-- discount: Total diskon (jika ada, masukkan angka positif)
-- tax: Pajak PPN (jika ada, masukkan angka positif)
-- serviceCharge: Biaya layanan (jika ada, masukkan angka positif)
-- total: Total nominal yang harus dibayar pada struk (nominal angka saja)
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'ocr', data: { imagePart } })
+    });
 
-Kembalikan HANYA format JSON valid berikut tanpa markdown wrapper (\`\`\`json) atau teks penjelasan lainnya:
-{
-  "merchantName": "Nama Toko",
-  "items": [
-    { "name": "NAMA PRODUK", "price": 10000 }
-  ],
-  "subtotal": 10000,
-  "discount": 0,
-  "tax": 0,
-  "serviceCharge": 0,
-  "total": 10000
-}
-`;
+    if (!response.ok) {
+      const { isQuota, message } = await parseBackendError(response);
+      if (isQuota) {
+        console.warn('OCR: Quota exceeded, falling back to mock data');
+        return MOCK_OCR;
+      }
+      throw new Error(message);
+    }
 
-    const result = await model.generateContent([prompt, imagePart]);
-    const text = result.response.text().trim();
-    
-    // Clean potential markdown output
-    const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(jsonStr);
+    return await response.json();
   } catch (error) {
-    console.error('Error parsing receipt OCR:', error);
-    return MOCK_OCR; // Fallback to mock data on error
+    console.error('Error parsing receipt OCR via backend:', error);
+    return MOCK_OCR;
   }
 };
 
 export const chatWithAI = async (chatHistory, userMessage, currentStats) => {
-  if (!isGeminiConfigured()) {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+  try {
+    const response = await fetch('/api/gemini', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'chat',
+        data: { chatHistory, userMessage, currentStats }
+      })
+    });
+
+    if (!response.ok) {
+      const { isQuota, message } = await parseBackendError(response);
+      if (isQuota) {
+        return {
+          reply: '⚠️ Kuota AI sedang habis. Coba lagi beberapa menit ya! Sementara ini fitur AI offline dulu.',
+          quotaExceeded: true
+        };
+      }
+      throw new Error(message);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in chatWithAI via backend:', error);
+
     const lowerMsg = userMessage.toLowerCase();
     if (lowerMsg.includes('parkir')) {
       return {
@@ -173,65 +156,13 @@ export const chatWithAI = async (chatHistory, userMessage, currentStats) => {
       };
     }
     if (lowerMsg.includes('roasting') || lowerMsg.includes('evaluasi') || lowerMsg.includes('parah')) {
-      const charRoasts = MOCK_ROASTS[currentStats.character] || MOCK_ROASTS['Dosen Killer'];
+      const charRoasts = MOCK_ROASTS[currentStats?.character] || MOCK_ROASTS['Dosen Killer'];
       return {
-        reply: `[${currentStats.character} - Mode ${currentStats.spiciness}]: ${charRoasts[currentStats.spiciness]}`
+        reply: `[${currentStats?.character} - Mode ${currentStats?.spiciness}]: ${charRoasts[currentStats?.spiciness]}`
       };
     }
     return {
       reply: "Halo! Saya adalah AI StrukIn. Kamu bisa lapor pengeluaran (misal: 'bayar parkir 2 ribu') atau minta roasting pola belanjamu."
     };
-  }
-
-  try {
-    const ai = new GoogleGenerativeAI(apiKey);
-    const model = ai.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
-    const prompt = `
-Kamu adalah "StrukIn AI", asisten keuangan pribadi yang cerdas dan asyik.
-Persona saat ini: "${currentStats.character}" dengan tingkat kepedasan "${currentStats.spiciness}".
-
-Kamu bertugas mendengarkan percakapan pengguna.
-Pengguna bisa:
-1. Melaporkan pengeluaran secara alami (contoh: "tadi beli kopi starbucks 55rb", "bayar kosan 1.5jt", "beli obat pusing 15.000").
-2. Meminta evaluasi atau nasihat finansial.
-
-Data keuangan pengguna saat ini:
-- Limit Bulanan: Rp ${Number(currentStats.limit).toLocaleString('id-ID')}
-- Terpakai: Rp ${Number(currentStats.spent).toLocaleString('id-ID')}
-- Sisa Saldo: Rp ${Number(currentStats.limit - currentStats.spent).toLocaleString('id-ID')}
-
-Jika pengguna berniat mencatat transaksi baru, kamu harus menyarankan pencatatan otomatis.
-Kembalikan respon dalam format JSON berikut:
-{
-  "reply": "Kalimat balasan percakapan dari kamu sesuai persona dan level pedas",
-  "command": {
-    "action": "add_transaction",
-    "title": "Nama Transaksi",
-    "amount": 25000,
-    "category": "Makan" // Harus salah satu dari: 'Makan', 'Transport', 'Lifestyle', 'Kesehatan', 'Hiburan', 'Lainnya'
-  } // (sertakan objek command hanya jika pengguna melaporkan pengeluaran baru)
-}
-
-Kembalikan HANYA format JSON valid tanpa markdown wrapper (\`\`\`json).
-`;
-
-    // Map history to Gemini format
-    const contents = [
-      { role: 'user', parts: [{ text: prompt }] },
-      ...chatHistory.map(c => ({
-        role: c.sender === 'user' ? 'user' : 'model',
-        parts: [{ text: c.text }]
-      })),
-      { role: 'user', parts: [{ text: userMessage }] }
-    ];
-
-    const result = await model.generateContent({ contents });
-    const text = result.response.text().trim();
-    const jsonStr = text.replace(/```json/g, '').replace(/```/g, '').trim();
-    return JSON.parse(jsonStr);
-  } catch (error) {
-    console.error('Error in chatWithAI:', error);
-    return { reply: "Maaf terjadi kesalahan koneksi dengan AI. Coba lagi nanti." };
   }
 };

@@ -264,25 +264,25 @@ export default function App() {
             onClick={() => setActiveTab('Home')}
             className={`nav-link ${activeTab === 'Home' ? 'active' : ''}`}
           >
-            <Home size={16} /> Home
+            <Home size={16} /> <span className="nav-text">Home</span>
           </button>
           <button
             onClick={() => setActiveTab('Riwayat')}
             className={`nav-link ${activeTab === 'Riwayat' ? 'active' : ''}`}
           >
-            <HistoryIcon size={16} /> Riwayat
+            <HistoryIcon size={16} /> <span className="nav-text">Riwayat</span>
           </button>
           <button
             onClick={() => setActiveTab('Scan')}
             className={`nav-link ${activeTab === 'Scan' ? 'active' : ''}`}
           >
-            <Camera size={16} /> Scan
+            <Camera size={16} /> <span className="nav-text">Scan</span>
           </button>
           <button
             onClick={() => setActiveTab('AI Chat')}
             className={`nav-link ${activeTab === 'AI Chat' ? 'active' : ''}`}
           >
-            <MessageSquare size={16} /> AI Chat
+            <MessageSquare size={16} /> <span className="nav-text">AI Chat</span>
           </button>
         </nav>
 
@@ -295,8 +295,8 @@ export default function App() {
             <div style={styles.navAvatar}>
               {sessionUser.email ? sessionUser.email[0].toUpperCase() : 'U'}
             </div>
-            <span>{sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0]}</span>
-            {isDemo && <span style={styles.demoBadge}>Demo</span>}
+            <span className="nav-profile-name">{sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0]}</span>
+            {isDemo && <span className="nav-profile-demo" style={styles.demoBadge}>Demo</span>}
           </button>
         </div>
       </header>
@@ -353,6 +353,7 @@ export default function App() {
               await handleUpdateProfileSettings(settings);
             }}
             onLogout={handleLogout}
+            setActiveTab={setActiveTab}
           />
         )}
       </main>

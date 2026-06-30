@@ -353,3 +353,33 @@ button, input, select, textarea {
   color: var(--text-muted);
   font-weight: 600;
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 14px;
+  }
+  
+  .logo span {
+    display: none;
+  }
+  
+  .nav-text {
+    display: none;
+  }
+  
+  .nav-profile-name, .nav-profile-demo {
+    display: none;
+  }
+  
+  .nav-links {
+    gap: 2px;
+  }
+  
+  .nav-link {
+    padding: 8px 10px;
+  }
+  
+  .main-content {
+    padding: 16px 12px;
+  }
+}
