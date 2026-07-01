@@ -104,11 +104,15 @@ button, input, select, textarea {
   color: var(--color-primary);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0;
   text-decoration: none;
 }
 
-.logo span {
+.logo svg {
+  margin-right: 8px;
+}
+
+.logo-in {
   color: var(--text-main);
 }
 
@@ -359,8 +363,8 @@ button, input, select, textarea {
     padding: 10px 14px;
   }
   
-  .logo span {
-    display: none;
+  .logo-in {
+    display: inline;
   }
   
   .nav-text {

@@ -256,7 +256,7 @@ export default function App() {
       <header className="navbar">
         <a href="/" className="logo">
           <Sparkles size={24} />
-          Struk<span>In</span>
+          Struk<span className="logo-in">In</span>
         </a>
 
         <nav className="nav-links">
