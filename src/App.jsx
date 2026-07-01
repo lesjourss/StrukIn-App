@@ -7,7 +7,7 @@ import History from './components/History';
 import Scan from './components/Scan';
 import Chat from './components/Chat';
 import ProfilePage from './components/ProfilePage';
-import { Sparkles, Home, History as HistoryIcon, Camera, MessageSquare, User } from 'lucide-react';
+import { ReceiptText, Home, History as HistoryIcon, Camera, MessageSquare, User } from 'lucide-react';
 
 export default function App() {
   const [sessionUser, setSessionUser] = useState(null);
@@ -255,7 +255,7 @@ export default function App() {
       {/* Navigation Header */}
       <header className="navbar">
         <a href="/" className="logo">
-          <Sparkles size={24} />
+          <ReceiptText size={24} />
           Struk<span className="logo-in">In</span>
         </a>
 
