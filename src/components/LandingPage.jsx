@@ -7,7 +7,7 @@ import '../landing.css';
 
 const faqs = [
   { q: 'Apakah data keuanganku aman?', a: 'Ya, data kamu disimpan secara aman menggunakan enkripsi end-to-end. Kami tidak pernah menjual data pribadimu ke pihak ketiga.' },
-  { q: 'Apakah StrukIn gratis?', a: 'StrukIn tersedia gratis dengan fitur lengkap. Coba Demo Mode tanpa perlu daftar akun!' },
+  { q: 'Apakah StrukIn gratis?', a: 'StrukIn tersedia gratis dengan fitur lengkap.' },
   { q: 'Bagaimana cara kerja Scan struk?', a: 'Cukup foto struk belanjaanmu, AI kami otomatis mengekstrak nominal, kategori, dan merchant dalam hitungan detik.' },
   { q: 'Apa itu AI Roasting?', a: 'AI Roasting adalah fitur feedback jujur (dan sedikit pedas) dari AI kami tentang pola pengeluaranmu. Sakit dikit, tapi bikin melek finansial!' },
   { q: 'Bisa dipakai di HP?', a: 'Tentu! StrukIn fully responsive dan bisa diakses lewat browser di HP, tablet, maupun desktop.' },
@@ -242,7 +242,7 @@ export default function LandingPage({ onGetStarted }) {
             </div>
           </div>
           <div className="lp-footer-bottom">
-            <span>© 2025 StrukIn. All rights reserved.</span>
+            <span>© 2026 StrukIn. All rights reserved.</span>
           </div>
         </div>
       </footer>
