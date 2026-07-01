@@ -7,6 +7,7 @@ import History from './components/History';
 import Scan from './components/Scan';
 import Chat from './components/Chat';
 import ProfilePage from './components/ProfilePage';
+import LandingPage from './components/LandingPage';
 import { ReceiptText, Home, History as HistoryIcon, Camera, MessageSquare, User } from 'lucide-react';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('Home');
   const [isDemo, setIsDemo] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [showLanding, setShowLanding] = useState(true);
 
   // Check if Supabase is properly configured
   const isSupabaseConfigured = () => {
@@ -233,8 +235,11 @@ export default function App() {
     );
   }
 
-  // Not Logged In
+  // Not Logged In — show Landing Page first, then Auth
   if (!sessionUser) {
+    if (showLanding) {
+      return <LandingPage onGetStarted={() => setShowLanding(false)} />;
+    }
     return <Auth onAuthSuccess={handleAuthSuccess} />;
   }
 
