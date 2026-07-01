@@ -36,6 +36,13 @@ export default function LandingPage({ onGetStarted }) {
   const [openFaq, setOpenFaq] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const smoothScroll = (e, id) => {
+    e.preventDefault();
+    setMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="lp-root">
       {/* NAVBAR */}
@@ -46,13 +53,12 @@ export default function LandingPage({ onGetStarted }) {
             Struk<span className="lp-logo-in">In</span>
           </a>
           <nav className="lp-nav-links">
-            <a href="#features">Fitur</a>
-            <a href="#how-it-works">Cara Kerja</a>
-            <a href="#testimonials">Testimoni</a>
-            <a href="#faq">FAQ</a>
+            <a href="#features" onClick={e => smoothScroll(e, 'features')}>Fitur</a>
+            <a href="#how-it-works" onClick={e => smoothScroll(e, 'how-it-works')}>Cara Kerja</a>
+            <a href="#testimonials" onClick={e => smoothScroll(e, 'testimonials')}>Testimoni</a>
+            <a href="#faq" onClick={e => smoothScroll(e, 'faq')}>FAQ</a>
           </nav>
           <div className="lp-nav-cta">
-            <button className="lp-btn-ghost" onClick={onGetStarted}>Masuk</button>
             <button className="lp-btn-primary" onClick={onGetStarted}>
               Coba Gratis <ArrowRight size={16} />
             </button>
@@ -63,10 +69,10 @@ export default function LandingPage({ onGetStarted }) {
         </div>
         {menuOpen && (
           <div className="lp-mobile-menu">
-            <a href="#features" onClick={() => setMenuOpen(false)}>Fitur</a>
-            <a href="#how-it-works" onClick={() => setMenuOpen(false)}>Cara Kerja</a>
-            <a href="#testimonials" onClick={() => setMenuOpen(false)}>Testimoni</a>
-            <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
+            <a href="#features" onClick={e => smoothScroll(e, 'features')}>Fitur</a>
+            <a href="#how-it-works" onClick={e => smoothScroll(e, 'how-it-works')}>Cara Kerja</a>
+            <a href="#testimonials" onClick={e => smoothScroll(e, 'testimonials')}>Testimoni</a>
+            <a href="#faq" onClick={e => smoothScroll(e, 'faq')}>FAQ</a>
             <button className="lp-btn-primary lp-btn-full" onClick={onGetStarted}>Coba Gratis</button>
           </div>
         )}
@@ -97,16 +103,6 @@ export default function LandingPage({ onGetStarted }) {
             <button className="lp-btn-primary lp-btn-lg" onClick={onGetStarted}>
               Mulai Sekarang — Gratis! <ArrowRight size={18} />
             </button>
-            <button className="lp-btn-ghost lp-btn-lg" onClick={onGetStarted}>
-              Coba Demo Dulu
-            </button>
-          </div>
-          <div className="lp-hero-stats">
-            <div className="lp-stat"><strong>10K+</strong><span>Pengguna Aktif</span></div>
-            <div className="lp-stat-divider" />
-            <div className="lp-stat"><strong>500K+</strong><span>Struk Dipindai</span></div>
-            <div className="lp-stat-divider" />
-            <div className="lp-stat"><strong>4.9★</strong><span>Rating Pengguna</span></div>
           </div>
         </div>
       </section>
