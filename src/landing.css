@@ -43,15 +43,15 @@
   font-family: 'Outfit', sans-serif;
   font-size: 22px;
   font-weight: 800;
-  color: #006b5f;
+  color: #0d9488;
   display: flex;
   align-items: center;
   gap: 0;
   text-decoration: none;
   white-space: nowrap;
 }
-.lp-logo svg { margin-right: 8px; color: #14b8a6; }
-.lp-logo-in { color: #191c1e; }
+.lp-logo svg { margin-right: 8px; color: #0d9488; }
+.lp-logo-in { color: #1e293b; }
 
 .lp-nav-links {
   display: flex;
