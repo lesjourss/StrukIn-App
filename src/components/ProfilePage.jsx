@@ -52,12 +52,19 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
     { id: 'Pedes Mampus', label: '🔥 Pedes Mampus', desc: 'Jujur sadis tanpa filter' },
   ];
 
-  const handleTopUp = () => {
+  const handleTopUp = async () => {
     const raw = Number(topUpAmount.toString().replace(/\./g, ''));
     if (!raw || raw <= 0) return;
-    setMonthlyLimit(prev => Number(prev) + raw);
+    const newLimit = Number(monthlyLimit) + raw;
+    setMonthlyLimit(newLimit);
     setTopUpAmount('');
     setShowTopUp(false);
+    // Langsung simpan ke profil agar Dashboard ikut update
+    await onProfileUpdated({
+      monthly_limit: newLimit,
+      ai_character: aiCharacter,
+      ai_spiciness: aiSpiciness,
+    });
   };
 
   const handleSave = async () => {
@@ -243,9 +250,9 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
                   type="text"
                   inputMode="numeric"
                   value={monthlyLimit === 0 ? '' : formatNumber(monthlyLimit)}
-                  placeholder="0"
-                  onChange={handleLimitChange}
-                  style={styles.budgetInput}
+                  placeholder="Belum diatur"
+                  readOnly
+                  style={{ ...styles.budgetInput, cursor: 'default', color: 'var(--text-muted)', backgroundColor: 'var(--bg-tertiary)' }}
                 />
               </div>
               {isBelowMin && (
@@ -253,22 +260,6 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
                   ⚠️ Budget terlalu kecil! Minimal Rp 10.000 ya.
                 </p>
               )}
-              <div style={styles.quickBudgets}>
-                {[500000, 1000000, 2000000, 5000000].map(amt => (
-                  <button
-                    key={amt}
-                    onClick={() => setMonthlyLimit(amt)}
-                    style={{
-                      ...styles.quickBtn,
-                      backgroundColor: Number(monthlyLimit) === amt ? 'var(--color-primary)' : 'var(--bg-tertiary)',
-                      color: Number(monthlyLimit) === amt ? 'white' : 'var(--text-muted)',
-                      fontWeight: Number(monthlyLimit) === amt ? 700 : 500,
-                    }}
-                  >
-                    {amt >= 1000000 ? `${amt / 1000000}Jt` : `${amt / 1000}K`}
-                  </button>
-                ))}
-              </div>
 
               {/* Tambah Saldo Toggle */}
               <div style={{ marginTop: '12px' }}>
