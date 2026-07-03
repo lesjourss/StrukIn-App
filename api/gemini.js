@@ -1,5 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+export const config = {
+  maxDuration: 60,
+};
+
 // Initialize Gemini GenAI using server-side environment variable
 const apiKey = process.env.GEMINI_API_KEY || '';
 
