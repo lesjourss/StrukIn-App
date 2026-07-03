@@ -87,6 +87,10 @@ button, input, select, textarea {
   padding: 24px 16px;
 }
 
+.desktop-nav-links {
+  display: none;
+}
+
 /* Top Bar — Logo only */
 .top-bar {
   background-color: rgba(255, 255, 255, 0.9);
@@ -526,11 +530,53 @@ button, input, select, textarea {
   
   .main-content {
     padding: 16px 12px;
+    padding-bottom: 100px; /* Jarak untuk floating bottom-nav di mobile */
   }
 
   /* Prevent inline-flex elements from overflowing */
   .lp-hero-roast {
     max-width: 100%;
     box-sizing: border-box;
+  }
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none !important;
+  }
+
+  .desktop-nav-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background-color: var(--bg-tertiary);
+    padding: 4px;
+    border-radius: var(--border-radius-md);
+  }
+
+  .desktop-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-muted);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+  }
+
+  .desktop-nav-link:hover {
+    color: var(--color-primary);
+  }
+
+  .desktop-nav-link.active {
+    background-color: var(--bg-secondary);
+    color: var(--color-primary);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   }
 }

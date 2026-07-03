@@ -257,17 +257,60 @@ export default function App() {
   // Logged In Main Dashboard Layout
   return (
     <div className="app-container">
-      {/* Top Bar — Logo Only */}
+      {/* Top Bar — Logo & Desktop Nav */}
       <header className="top-bar">
-        <a href="/" className="logo">
-          <ReceiptText size={22} />
-          Struk<span className="logo-in">In</span>
-        </a>
-        {isDemo && <span style={styles.demoBadge}>Demo</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <a href="/" className="logo">
+            <ReceiptText size={22} />
+            Struk<span className="logo-in">In</span>
+          </a>
+          {isDemo && <span style={styles.demoBadge}>Demo</span>}
+        </div>
+
+        {/* Desktop Navigation Links */}
+        <div className="desktop-nav-links">
+          <button
+            onClick={() => setActiveTab('Home')}
+            className={`desktop-nav-link ${activeTab === 'Home' ? 'active' : ''}`}
+          >
+            <Home size={18} />
+            <span>Home</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('Riwayat')}
+            className={`desktop-nav-link ${activeTab === 'Riwayat' ? 'active' : ''}`}
+          >
+            <HistoryIcon size={18} />
+            <span>Riwayat</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('Scan')}
+            className={`desktop-nav-link ${activeTab === 'Scan' ? 'active' : ''}`}
+          >
+            <Camera size={18} />
+            <span>Scan</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('AI Chat')}
+            className={`desktop-nav-link ${activeTab === 'AI Chat' ? 'active' : ''}`}
+          >
+            <MessageSquare size={18} />
+            <span>AI Chat</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('Profil')}
+            className={`desktop-nav-link ${activeTab === 'Profil' ? 'active' : ''}`}
+          >
+            <div style={styles.navAvatar}>
+              {sessionUser.email ? sessionUser.email[0].toUpperCase() : 'U'}
+            </div>
+            <span>Profil</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="main-content" style={{ paddingBottom: '100px' }}>
+      <main className="main-content">
         {activeTab === 'Home' && (
           <Dashboard
             user={sessionUser}
