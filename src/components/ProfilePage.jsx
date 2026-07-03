@@ -15,6 +15,8 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showSettings, setShowSettings] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState('');
+  const [showTopUp, setShowTopUp] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -49,6 +51,14 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
     { id: 'Sedang', label: '🌶️ Sedang', desc: 'Balanced & to the point' },
     { id: 'Pedes Mampus', label: '🔥 Pedes Mampus', desc: 'Jujur sadis tanpa filter' },
   ];
+
+  const handleTopUp = () => {
+    const raw = Number(topUpAmount.toString().replace(/\./g, ''));
+    if (!raw || raw <= 0) return;
+    setMonthlyLimit(prev => Number(prev) + raw);
+    setTopUpAmount('');
+    setShowTopUp(false);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -258,6 +268,77 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
                     {amt >= 1000000 ? `${amt / 1000000}Jt` : `${amt / 1000}K`}
                   </button>
                 ))}
+              </div>
+
+              {/* Tambah Saldo Toggle */}
+              <div style={{ marginTop: '12px' }}>
+                <button
+                  onClick={() => setShowTopUp(!showTopUp)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--color-primary)', fontSize: '13px', fontWeight: '700',
+                    padding: '4px 0',
+                  }}
+                >
+                  <span style={{ fontSize: '18px', lineHeight: 1 }}>{showTopUp ? '−' : '+'}</span>
+                  {showTopUp ? 'Batal Tambah Saldo' : 'Tambah Saldo ke Budget'}
+                </button>
+
+                {showTopUp && (
+                  <div style={{ marginTop: '12px', padding: '16px', backgroundColor: 'var(--bg-tertiary)', borderRadius: '12px' }}>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px', fontWeight: '600' }}>
+                      Tambahkan nominal ke budget saat ini (Rp {formatNumber(monthlyLimit)})
+                    </p>
+                    <div style={{
+                      display: 'flex', alignItems: 'center',
+                      border: '2px solid var(--color-primary)',
+                      borderRadius: '10px', overflow: 'hidden', marginBottom: '10px',
+                    }}>
+                      <span style={{ padding: '10px 12px', backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary-dark)', fontWeight: '800', fontSize: '13px' }}>+ Rp</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="0"
+                        value={topUpAmount === '' ? '' : formatNumber(Number(topUpAmount.toString().replace(/\./g, '')))}
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\./g, '');
+                          if (raw === '' || /^\d+$/.test(raw)) setTopUpAmount(raw);
+                        }}
+                        style={{ flex: 1, padding: '10px 12px', border: 'none', outline: 'none', fontSize: '16px', fontWeight: '700', backgroundColor: 'var(--bg-primary)' }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                      {[100000, 250000, 500000, 1000000].map(amt => (
+                        <button
+                          key={amt}
+                          onClick={() => setTopUpAmount(String(amt))}
+                          style={{
+                            ...styles.quickBtn,
+                            backgroundColor: Number(topUpAmount) === amt ? 'var(--color-primary)' : 'var(--bg-secondary)',
+                            color: Number(topUpAmount) === amt ? 'white' : 'var(--text-muted)',
+                            border: '1px solid var(--border-color)',
+                          }}
+                        >
+                          +{amt >= 1000000 ? `${amt/1000000}Jt` : `${amt/1000}K`}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleTopUp}
+                      disabled={!topUpAmount || Number(topUpAmount) <= 0}
+                      style={{
+                        width: '100%', padding: '10px', borderRadius: '10px',
+                        border: 'none', backgroundColor: 'var(--color-primary)',
+                        color: 'white', fontWeight: '700', fontSize: '14px',
+                        cursor: topUpAmount ? 'pointer' : 'not-allowed',
+                        opacity: topUpAmount ? 1 : 0.5,
+                      }}
+                    >
+                      Tambahkan ke Budget
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
