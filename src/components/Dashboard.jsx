@@ -499,12 +499,14 @@ const styles = {
   splitRow: {
     display: 'flex',
     gap: '24px',
+    flexWrap: 'wrap',
   },
   splitCard: {
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
+    minWidth: '140px',
   },
   smallCardLabel: {
     fontSize: '13px',
@@ -555,6 +557,7 @@ const styles = {
   formRow: {
     display: 'flex',
     gap: '14px',
+    flexWrap: 'wrap',
   },
   quickBtn: {
     width: '100%',
