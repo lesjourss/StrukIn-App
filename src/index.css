@@ -552,6 +552,9 @@ button, input, select, textarea {
     background-color: var(--bg-tertiary);
     padding: 4px;
     border-radius: var(--border-radius-md);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .desktop-nav-link {
