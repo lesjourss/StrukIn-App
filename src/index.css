@@ -103,23 +103,25 @@ button, input, select, textarea {
   box-shadow: var(--shadow-sm);
 }
 
-/* Bottom Navigation Bar */
+/* Bottom Navigation Bar — Floating Pill Style */
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid var(--border-color);
-  padding: 8px 4px 12px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  background-color: #ffffff;
+  border-radius: 999px;
+  padding: 10px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
   gap: 4px;
+  width: calc(100% - 40px);
+  max-width: 420px;
+  /* Notch effect for center button */
+  overflow: visible;
 }
 
 .bottom-nav-item {
@@ -127,53 +129,80 @@ button, input, select, textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   flex: 1;
-  padding: 8px 4px;
+  padding: 6px 4px;
   background: transparent;
   border: none;
   cursor: pointer;
-  color: var(--text-muted);
-  font-size: 11px;
+  color: #b0bec5;
+  font-size: 10px;
   font-weight: 600;
   font-family: var(--font-primary);
-  border-radius: 12px;
+  border-radius: 999px;
   transition: var(--transition-smooth);
+  position: relative;
 }
 
 .bottom-nav-item:hover {
   color: var(--color-primary);
-  background-color: var(--color-primary-light);
 }
 
 .bottom-nav-item.active {
   color: var(--color-primary);
 }
 
-.bottom-nav-item.active svg {
-  filter: drop-shadow(0 0 6px rgba(13, 148, 136, 0.4));
+/* Active dot indicator */
+.bottom-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
 }
 
-/* Scan button — menonjol di tengah */
+/* Center Scan button — floating circle above pill */
 .bottom-nav-scan {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: var(--color-primary);
   color: white !important;
-  border-radius: 16px;
-  padding: 10px 16px;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
-  transform: translateY(-6px);
-  flex: 1.2;
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  padding: 0;
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.45);
+  transform: translateY(-18px);
+  flex: 0 0 54px;
+  transition: var(--transition-smooth);
+  font-size: 10px;
+  gap: 2px;
+}
+
+.bottom-nav-scan span {
+  font-size: 9px;
+  line-height: 1;
+  margin-top: 1px;
 }
 
 .bottom-nav-scan:hover {
-  background: linear-gradient(135deg, var(--color-primary-dark), #065f46);
+  background: var(--color-primary-dark);
   color: white !important;
-  transform: translateY(-8px);
-  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
+  transform: translateY(-20px);
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.5);
 }
 
 .bottom-nav-scan.active {
   color: white !important;
+  background: var(--color-primary-dark);
+}
+
+/* Active dot for scan — shows below pill */
+.bottom-nav-scan.active::after {
+  bottom: -22px;
 }
 
 /* Legacy navbar (still used by older components if any) */

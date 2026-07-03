@@ -267,7 +267,7 @@ export default function App() {
       </header>
 
       {/* Main Content Area */}
-      <main className="main-content" style={{ paddingBottom: '80px' }}>
+      <main className="main-content" style={{ paddingBottom: '100px' }}>
         {activeTab === 'Home' && (
           <Dashboard
             user={sessionUser}
