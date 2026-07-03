@@ -293,7 +293,7 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
             <>
               <div style={styles.header}>
                 <div style={styles.badge}><Check size={16} /> Hasil Analisis</div>
-                <h1 style={styles.title}>Cocok Banget sama Kamu! {info.emoji}</h1>
+                <h1 style={styles.title}>Cocok Banget sama Kamu!</h1>
                 <p style={styles.subtitle}>Berdasarkan jawabanmu, karakter AI yang paling pas adalah...</p>
               </div>
 
