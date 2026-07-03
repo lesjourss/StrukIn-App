@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { parseReceiptOCR } from '../lib/gemini';
+import { parseReceiptOCR, MOCK_OCR } from '../lib/gemini';
 import { Camera, Image, Check, Plus, Trash2, ArrowRight, RefreshCw, Users, User } from 'lucide-react';
 
 export default function Scan({ user, isDemo, onTransactionsSaved }) {
@@ -37,8 +37,9 @@ export default function Scan({ user, isDemo, onTransactionsSaved }) {
       const data = await parseReceiptOCR(selectedFile);
       setParsedData(data);
     } catch (err) {
-      console.error(err);
-      alert('Gagal mendeteksi nota belanja. Menggunakan mock data untuk demo.');
+      console.error('Scan Error:', err);
+      alert(`Gagal mendeteksi nota belanja: ${err.message || err}\n\nMenggunakan data simulasi (mock) untuk demo.`);
+      setParsedData(MOCK_OCR);
     } finally {
       setScanning(false);
     }

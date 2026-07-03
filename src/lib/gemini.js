@@ -17,7 +17,7 @@ const MOCK_ROASTS = {
   }
 };
 
-const MOCK_OCR = {
+export const MOCK_OCR = {
   merchantName: 'Indomaret',
   items: [
     { name: 'IDM RAMOS SUPER 5KG', price: 59900 },
@@ -75,45 +75,94 @@ export const generateRoasting = async (limit, spent, recentTransactions, charact
   }
 };
 
-export const parseReceiptOCR = async (imageFile) => {
-  try {
-    const fileToGenerativePart = async (file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          resolve({
-            inlineData: {
-              data: reader.result.split(',')[1],
-              mimeType: file.type
-            },
-          });
-        };
-        reader.readAsDataURL(file);
-      });
+const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.85) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Gagal mengompresi gambar pada kanvas'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = (err) => reject(err);
     };
+    reader.onerror = (err) => reject(err);
+  });
+};
 
-    const imagePart = await fileToGenerativePart(imageFile);
-
-    const response = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'ocr', data: { imagePart } })
-    });
-
-    if (!response.ok) {
-      const { isQuota, message } = await parseBackendError(response);
-      if (isQuota) {
-        console.warn('OCR: Quota exceeded, falling back to mock data');
-        return MOCK_OCR;
-      }
-      throw new Error(message);
+export const parseReceiptOCR = async (imageFile) => {
+  let processedFile = imageFile;
+  try {
+    // Hanya kompres jika browser mendukung canvas dan file adalah image
+    if (typeof window !== 'undefined' && imageFile.type.startsWith('image/')) {
+      processedFile = await compressImage(imageFile);
     }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error parsing receipt OCR via backend:', error);
-    return MOCK_OCR;
+  } catch (compressErr) {
+    console.warn('Gagal mengompresi gambar secara client-side, menggunakan file asli:', compressErr);
   }
+
+  const fileToGenerativePart = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve({
+          inlineData: {
+            data: reader.result.split(',')[1],
+            mimeType: 'image/jpeg'
+          },
+        });
+      };
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const imagePart = await fileToGenerativePart(processedFile);
+
+  const response = await fetch('/api/gemini', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'ocr', data: { imagePart } })
+  });
+
+  if (!response.ok) {
+    const { isQuota, message } = await parseBackendError(response);
+    throw new Error(message || `HTTP ${response.status}`);
+  }
+
+  return await response.json();
 };
 
 export const chatWithAI = async (chatHistory, userMessage, currentStats) => {
