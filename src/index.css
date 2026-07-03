@@ -142,6 +142,10 @@ button, input, select, textarea {
   border-radius: 999px;
   transition: var(--transition-smooth);
   position: relative;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .bottom-nav-item:hover {
