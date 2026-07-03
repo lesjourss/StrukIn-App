@@ -12,7 +12,6 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
   const [aiSpiciness, setAiSpiciness] = useState(profile?.ai_spiciness || 'Sedang');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showSettings, setShowSettings] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
@@ -85,34 +84,7 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
 
   return (
     <div style={styles.page} className="animated-fade-in">
-      {/* Logout Confirm Modal */}
-      {showLogoutConfirm && (
-        <div style={styles.overlay}>
-          <div style={styles.modal}>
-            <div style={styles.modalIcon}>
-              <AlertTriangle size={32} color="#f59e0b" />
-            </div>
-            <h3 style={styles.modalTitle}>Yakin mau keluar?</h3>
-            <p style={styles.modalDesc}>
-              Semua data transaksi kamu tetap tersimpan dan bisa diakses lagi saat login.
-            </p>
-            <div style={styles.modalBtns}>
-              <button
-                onClick={() => setShowLogoutConfirm(false)}
-                style={styles.cancelBtn}
-              >
-                <X size={16} /> Batal
-              </button>
-              <button
-                onClick={onLogout}
-                style={styles.confirmLogoutBtn}
-              >
-                <LogOut size={16} /> Ya, Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Header */}
       {(!isMobile || showSettings) && (
@@ -172,7 +144,7 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
 
           {/* Tombol Keluar dari Akun */}
           <button
-            onClick={() => setShowLogoutConfirm(true)}
+            onClick={onLogout}
             style={styles.mobileLogoutBtn}
           >
             <LogOut size={16} />
@@ -220,7 +192,7 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
 
               {/* Logout Button */}
               <button
-                onClick={() => setShowLogoutConfirm(true)}
+                onClick={onLogout}
                 style={styles.logoutBtn}
               >
                 <LogOut size={18} />
@@ -563,39 +535,6 @@ const styles = {
     justifyContent: 'center', gap: '8px', width: '100%',
   },
 
-  // Modal overlay
-  overlay: {
-    position: 'fixed', inset: 0,
-    backgroundColor: 'transparent', backdropFilter: 'blur(6px)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    zIndex: 1000,
-  },
-  modal: {
-    backgroundColor: 'var(--bg-primary)', borderRadius: '20px',
-    padding: '32px', maxWidth: '380px', width: '90%',
-    textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-  },
-  modalIcon: {
-    width: '64px', height: '64px', borderRadius: '50%',
-    backgroundColor: '#fef3c7', display: 'flex',
-    alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px',
-  },
-  modalTitle: { fontSize: '20px', fontWeight: '800', marginBottom: '10px' },
-  modalDesc: { fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '24px' },
-  modalBtns: { display: 'flex', gap: '12px' },
-  cancelBtn: {
-    flex: 1, padding: '12px', borderRadius: '12px',
-    border: '2px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)',
-    color: 'var(--text-main)', fontWeight: '700', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-    fontSize: '14px',
-  },
-  confirmLogoutBtn: {
-    flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
-    backgroundColor: '#ef4444', color: 'white', fontWeight: '700', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-    fontSize: '14px',
-  },
 
   // Mobile Hub Styles
   mobileHub: {

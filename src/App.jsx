@@ -8,7 +8,7 @@ import Scan from './components/Scan';
 import Chat from './components/Chat';
 import ProfilePage from './components/ProfilePage';
 import LandingPage from './components/LandingPage';
-import { ReceiptText, Home, History as HistoryIcon, Camera, MessageSquare, User } from 'lucide-react';
+import { ReceiptText, Home, History as HistoryIcon, Camera, MessageSquare, User, AlertTriangle, X, LogOut } from 'lucide-react';
 
 export default function App() {
   const [sessionUser, setSessionUser] = useState(null);
@@ -18,6 +18,7 @@ export default function App() {
   const [isDemo, setIsDemo] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Check if Supabase is properly configured
   const isSupabaseConfigured = () => {
@@ -360,7 +361,7 @@ export default function App() {
             onProfileUpdated={async (settings) => {
               await handleUpdateProfileSettings(settings);
             }}
-            onLogout={handleLogout}
+            onLogout={() => setShowLogoutConfirm(true)}
             setActiveTab={setActiveTab}
           />
         )}
@@ -406,6 +407,38 @@ export default function App() {
           <span>Profil</span>
         </button>
       </nav>
+
+      {/* Global Logout Confirm Modal */}
+      {showLogoutConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-icon-wrap">
+              <AlertTriangle size={32} color="#f59e0b" />
+            </div>
+            <h3 className="modal-title-text">Yakin mau keluar?</h3>
+            <p className="modal-description">
+              Semua data transaksi kamu tetap tersimpan dan bisa diakses lagi saat login.
+            </p>
+            <div className="modal-button-group">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="modal-btn-cancel"
+              >
+                <X size={16} /> Batal
+              </button>
+              <button
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  handleLogout();
+                }}
+                className="modal-btn-confirm"
+              >
+                <LogOut size={16} /> Ya, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
