@@ -103,6 +103,7 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
   const [character, setCharacter] = useState('');
   const [spiciness, setSpiciness] = useState('Sedang');
   const [loading, setLoading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const formatNumber = (val) => val.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   const isBelowMin = limit > 0 && limit < 10000;
@@ -117,19 +118,25 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
 
   // ── Step 1: Jawab soal ──
   const handleAnswer = (personaVal) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+
     const newAnswers = [...answers];
     newAnswers[quizIdx] = personaVal;
     setAnswers(newAnswers);
 
-    if (quizIdx < questions.length - 1) {
-      setQuizIdx(quizIdx + 1);
-    } else {
-      // Semua soal terjawab → hitung karakter
-      const result = calcPersona(newAnswers);
-      setSuggestedChar(result);
-      setCharacter(result);
-      setStep(2);
-    }
+    setTimeout(() => {
+      if (quizIdx < questions.length - 1) {
+        setQuizIdx(quizIdx + 1);
+      } else {
+        // Semua soal terjawab → hitung karakter
+        const result = calcPersona(newAnswers);
+        setSuggestedChar(result);
+        setCharacter(result);
+        setStep(2);
+      }
+      setIsTransitioning(false);
+    }, 450); // Delay agar warna hijau terlihat
   };
 
   // ── Step 3 → Submit ──
@@ -187,7 +194,7 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
           <>
             <div style={styles.header}>
               <div style={styles.badge}><Sparkles size={16} /> Setup Keuanganmu</div>
-              <h1 style={styles.title}>Selamat Datang di StrukIn! 🎉</h1>
+              <h1 style={styles.title}>Selamat Datang di StrukIn! </h1>
               <p style={styles.subtitle}>Mulai dengan mengatur budget bulananmu.</p>
             </div>
             <form onSubmit={handleBudgetNext} style={styles.form}>
@@ -234,7 +241,7 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
           <>
             <div style={styles.header}>
               <div style={styles.badge}><Sparkles size={16} /> Pertanyaan {quizIdx + 1} dari {questions.length}</div>
-              <h1 style={styles.title}>Kenali Gayamu Dulu 🧠</h1>
+              <h1 style={styles.title}>Kenali Gayamu Dulu </h1>
               <p style={styles.subtitle}>Jawaban kamu akan menentukan karakter AI yang paling cocok.</p>
             </div>
 
@@ -260,8 +267,9 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
                   onClick={() => handleAnswer(opt.persona)}
                   style={{
                     ...styles.optionBtn,
-                    backgroundColor: answers[quizIdx] === opt.persona ? 'var(--color-primary-light)' : 'var(--bg-secondary)',
+                    backgroundColor: answers[quizIdx] === opt.persona ? 'var(--color-primary)' : 'var(--bg-secondary)',
                     borderColor: answers[quizIdx] === opt.persona ? 'var(--color-primary)' : 'var(--border-color)',
+                    color: answers[quizIdx] === opt.persona ? 'white' : 'var(--text-main)',
                   }}
                 >
                   {opt.label}
