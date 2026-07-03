@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { LogIn, Key, Mail, Sparkles } from 'lucide-react';
+import { Key, Mail, Sparkles } from 'lucide-react';
 
 export default function Auth({ onAuthSuccess }) {
   const [email, setEmail] = useState('');
@@ -39,12 +39,27 @@ export default function Auth({ onAuthSuccess }) {
 
     try {
       if (isSignUp) {
+        // Daftar akun biasa: email + password, langsung tersimpan di Supabase.
+        // Catatan: agar user langsung bisa dipakai tanpa menunggu email verifikasi,
+        // matikan toggle "Confirm email" di Supabase Dashboard ->
+        // Authentication -> Providers -> Email.
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
         });
         if (error) throw error;
-        alert('Registrasi berhasil! Silakan cek email Anda untuk verifikasi.');
+
+        if (data?.session) {
+          // "Confirm email" nonaktif -> Supabase langsung memberi session, user bisa langsung masuk.
+          onAuthSuccess(data.user, false);
+        } else if (data?.user && data.user.identities && data.user.identities.length === 0) {
+          // Tidak ada session & identities kosong -> email ini sudah pernah daftar sebelumnya.
+          setErrorMsg('Email ini sudah terdaftar. Silakan masuk menggunakan password Anda.');
+        } else {
+          // "Confirm email" masih aktif -> Supabase tetap minta verifikasi email dulu.
+          alert('Registrasi berhasil! Jika akun belum aktif, cek email untuk verifikasi, atau hubungi admin untuk mengaktifkan langsung.');
+          setIsSignUp(false);
+        }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -85,6 +100,12 @@ export default function Auth({ onAuthSuccess }) {
     } catch (error) {
       setErrorMsg(error.message);
     }
+  };
+
+  const handleToggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setErrorMsg('');
+    setPassword('');
   };
 
   const handleDemoBypass = () => {
@@ -144,6 +165,7 @@ export default function Auth({ onAuthSuccess }) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
                 required
               />
             </div>
@@ -172,7 +194,7 @@ export default function Auth({ onAuthSuccess }) {
 
         <div style={styles.toggleAuth}>
           {isSignUp ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
-          <button onClick={() => setIsSignUp(!isSignUp)} style={styles.toggleBtn}>
+          <button onClick={handleToggleMode} style={styles.toggleBtn}>
             {isSignUp ? 'Masuk di sini' : 'Daftar di sini'}
           </button>
         </div>
