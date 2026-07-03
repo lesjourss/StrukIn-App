@@ -257,57 +257,17 @@ export default function App() {
   // Logged In Main Dashboard Layout
   return (
     <div className="app-container">
-      {/* Navigation Header */}
-      <header className="navbar">
+      {/* Top Bar — Logo Only */}
+      <header className="top-bar">
         <a href="/" className="logo">
-          <ReceiptText size={24} />
+          <ReceiptText size={22} />
           Struk<span className="logo-in">In</span>
         </a>
-
-        <nav className="nav-links">
-          <button
-            onClick={() => setActiveTab('Home')}
-            className={`nav-link ${activeTab === 'Home' ? 'active' : ''}`}
-          >
-            <Home size={16} /> <span className="nav-text">Home</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('Riwayat')}
-            className={`nav-link ${activeTab === 'Riwayat' ? 'active' : ''}`}
-          >
-            <HistoryIcon size={16} /> <span className="nav-text">Riwayat</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('Scan')}
-            className={`nav-link ${activeTab === 'Scan' ? 'active' : ''}`}
-          >
-            <Camera size={16} /> <span className="nav-text">Scan</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('AI Chat')}
-            className={`nav-link ${activeTab === 'AI Chat' ? 'active' : ''}`}
-          >
-            <MessageSquare size={16} /> <span className="nav-text">AI Chat</span>
-          </button>
-        </nav>
-
-        <div className="nav-profile">
-          <button
-            onClick={() => setActiveTab('Profil')}
-            className={`nav-link ${activeTab === 'Profil' ? 'active' : ''}`}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px' }}
-          >
-            <div style={styles.navAvatar}>
-              {sessionUser.email ? sessionUser.email[0].toUpperCase() : 'U'}
-            </div>
-            <span className="nav-profile-name">{sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0]}</span>
-            {isDemo && <span className="nav-profile-demo" style={styles.demoBadge}>Demo</span>}
-          </button>
-        </div>
+        {isDemo && <span style={styles.demoBadge}>Demo</span>}
       </header>
 
       {/* Main Content Area */}
-      <main className="main-content">
+      <main className="main-content" style={{ paddingBottom: '80px' }}>
         {activeTab === 'Home' && (
           <Dashboard
             user={sessionUser}
@@ -334,7 +294,7 @@ export default function App() {
             isDemo={isDemo}
             onTransactionsSaved={(newTxList) => {
               newTxList.forEach(t => handleTransactionAdded(t));
-              setActiveTab('Riwayat'); // Redirect to history to view saved scans
+              setActiveTab('Riwayat');
             }}
           />
         )}
@@ -362,6 +322,47 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Bottom Navigation Bar */}
+      <nav className="bottom-nav">
+        <button
+          onClick={() => setActiveTab('Home')}
+          className={`bottom-nav-item ${activeTab === 'Home' ? 'active' : ''}`}
+        >
+          <Home size={22} />
+          <span>Home</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('Riwayat')}
+          className={`bottom-nav-item ${activeTab === 'Riwayat' ? 'active' : ''}`}
+        >
+          <HistoryIcon size={22} />
+          <span>Riwayat</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('Scan')}
+          className={`bottom-nav-item bottom-nav-scan ${activeTab === 'Scan' ? 'active' : ''}`}
+        >
+          <Camera size={24} />
+          <span>Scan</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('AI Chat')}
+          className={`bottom-nav-item ${activeTab === 'AI Chat' ? 'active' : ''}`}
+        >
+          <MessageSquare size={22} />
+          <span>AI Chat</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('Profil')}
+          className={`bottom-nav-item ${activeTab === 'Profil' ? 'active' : ''}`}
+        >
+          <div style={styles.navAvatar}>
+            {sessionUser.email ? sessionUser.email[0].toUpperCase() : 'U'}
+          </div>
+          <span>Profil</span>
+        </button>
+      </nav>
     </div>
   );
 }
