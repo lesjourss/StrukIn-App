@@ -566,7 +566,7 @@ const styles = {
   // Modal overlay
   overlay: {
     position: 'fixed', inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)',
+    backgroundColor: 'transparent', backdropFilter: 'blur(6px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     zIndex: 1000,
   },
