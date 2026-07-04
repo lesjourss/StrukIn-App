@@ -104,7 +104,7 @@ export default function LandingPage({ onGetStarted }) {
           <div className="lp-hero-roast">
             <div className="lp-roast-avatar">AI</div>
             <div className="lp-roast-bubble">
-              "Kopi Starbucks tiap hari? Saldo tabunganmu menangis di pojokan, lho. ☕️💅"
+              "Kopi Starbucks tiap hari? Saldo tabunganmu menangis di pojokan, lho."
             </div>
           </div>
           <div className="lp-hero-actions">
