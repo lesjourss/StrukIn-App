@@ -376,7 +376,7 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete, onBackT
           <>
             <div style={styles.header}>
               <div style={styles.badge}><Flame size={16} color="#ef4444" /> Langkah Terakhir</div>
-              <h1 style={styles.title}>Pilih Level Kepedasan 🌶️</h1>
+              <h1 style={styles.title}>Pilih Level Kepedasan</h1>
               <p style={styles.subtitle}>Seberapa "pedas" roasting dari {character} ke kamu?</p>
             </div>
 
