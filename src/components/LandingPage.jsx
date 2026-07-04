@@ -4,13 +4,15 @@ import {
   ArrowRight, Star, CheckCircle, MessageSquare, TrendingUp, ShieldCheck
 } from 'lucide-react';
 import '../landing.css';
+import PricingSection from './PricingSection';
 
 const faqs = [
   { q: 'Apakah data keuanganku aman?', a: 'Ya, data kamu disimpan secara aman menggunakan enkripsi end-to-end. Kami tidak pernah menjual data pribadimu ke pihak ketiga.' },
-  { q: 'Apakah StrukIn gratis?', a: 'StrukIn tersedia gratis dengan fitur lengkap.' },
+  { q: 'Apakah StrukIn gratis? Ada plan berbayar?', a: 'StrukIn tersedia gratis untuk fitur dasar. Untuk fitur unlimited dan advanced, tersedia plan Pro (Rp 29.000/bulan) dan Sultan (Rp 59.000/bulan). Coba gratis dulu, upgrade kalau udah ketagihan!' },
   { q: 'Bagaimana cara kerja Scan struk?', a: 'Cukup foto struk belanjaanmu, AI kami otomatis mengekstrak nominal, kategori, dan merchant dalam hitungan detik.' },
   { q: 'Apa itu AI Roasting?', a: 'AI Roasting adalah fitur feedback jujur (dan sedikit pedas) dari AI kami tentang pola pengeluaranmu. Sakit dikit, tapi bikin melek finansial!' },
   { q: 'Bisa dipakai di HP?', a: 'Tentu! StrukIn fully responsive dan bisa diakses lewat browser di HP, tablet, maupun desktop.' },
+  { q: 'Apakah bisa cancel plan kapan saja?', a: 'Tentu saja! Tidak ada ikatan kontrak, tidak ada drama. Cancel kapan saja dengan satu klik dari halaman profil.' },
 ];
 
 const testimonials = [
@@ -56,6 +58,7 @@ export default function LandingPage({ onGetStarted }) {
             <a href="#features" onClick={e => smoothScroll(e, 'features')}>Fitur</a>
             <a href="#how-it-works" onClick={e => smoothScroll(e, 'how-it-works')}>Cara Kerja</a>
             <a href="#testimonials" onClick={e => smoothScroll(e, 'testimonials')}>Testimoni</a>
+            <a href="#pricing" onClick={e => smoothScroll(e, 'pricing')}>Harga</a>
             <a href="#faq" onClick={e => smoothScroll(e, 'faq')}>FAQ</a>
           </nav>
           <div className="lp-nav-cta">
@@ -72,6 +75,7 @@ export default function LandingPage({ onGetStarted }) {
             <a href="#features" onClick={e => smoothScroll(e, 'features')}>Fitur</a>
             <a href="#how-it-works" onClick={e => smoothScroll(e, 'how-it-works')}>Cara Kerja</a>
             <a href="#testimonials" onClick={e => smoothScroll(e, 'testimonials')}>Testimoni</a>
+            <a href="#pricing" onClick={e => smoothScroll(e, 'pricing')}>Harga</a>
             <a href="#faq" onClick={e => smoothScroll(e, 'faq')}>FAQ</a>
             <button className="lp-btn-primary lp-btn-full" onClick={onGetStarted}>Coba Gratis</button>
           </div>
@@ -182,6 +186,9 @@ export default function LandingPage({ onGetStarted }) {
           </div>
         </div>
       </section>
+
+      {/* PRICING */}
+      <PricingSection onGetStarted={onGetStarted} />
 
       {/* CTA BANNER */}
       <section className="lp-cta-banner">

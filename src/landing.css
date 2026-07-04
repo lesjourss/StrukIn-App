@@ -540,6 +540,275 @@
   padding-top: 14px;
 }
 
+/* ---- PRICING ---- */
+.lp-pricing-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c7a77;
+  font-family: 'Outfit', sans-serif;
+}
+.lp-pricing-toggle .toggle-active { color: #191c1e; }
+
+.lp-toggle-btn {
+  width: 48px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: #e2e8f0;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.25s;
+  padding: 0;
+  flex-shrink: 0;
+}
+.lp-toggle-btn.on { background: linear-gradient(135deg, #14b8a6, #006b5f); }
+.lp-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.lp-toggle-btn.on .lp-toggle-knob { transform: translateX(22px); }
+
+.lp-pricing-save-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  background: #fef9c3;
+  color: #a16207;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid #fde047;
+}
+
+.lp-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 960px) { .lp-pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; } }
+@media (min-width: 601px) and (max-width: 960px) { .lp-pricing-grid { grid-template-columns: repeat(2, 1fr); max-width: 100%; } }
+
+.lp-pricing-card {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 32px 28px;
+  position: relative;
+  transition: all 0.25s;
+  overflow: hidden;
+}
+.lp-pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+}
+.lp-pricing-card--featured {
+  border-color: var(--plan-color);
+  box-shadow: 0 8px 32px rgba(13,148,136,0.15);
+  transform: translateY(-8px);
+}
+.lp-pricing-card--featured:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 50px rgba(13,148,136,0.2);
+}
+.lp-pricing-featured-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(20,184,166,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.lp-pricing-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+
+.lp-pricing-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.lp-pricing-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #191c1e;
+  margin-bottom: 8px;
+}
+
+.lp-pricing-tagline {
+  font-size: 13px;
+  font-style: italic;
+  color: #6c7a77;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  min-height: 40px;
+}
+
+.lp-pricing-price-wrap { margin-bottom: 4px; }
+.lp-pricing-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.lp-price-rp {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #3c4947;
+}
+.lp-price-main {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  color: #191c1e;
+  line-height: 1;
+}
+.lp-price-period {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  color: #6c7a77;
+  font-weight: 500;
+}
+.lp-price-annual-note {
+  font-size: 12px;
+  color: #6c7a77;
+  font-family: 'Outfit', sans-serif;
+  margin-top: 4px;
+}
+
+.lp-pricing-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 20px 0;
+}
+
+.lp-pricing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lp-pricing-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-family: 'Outfit', sans-serif;
+}
+.lp-pricing-feature.ok { color: #191c1e; }
+.lp-pricing-feature.no { color: #b0b8b4; }
+.lp-feat-check { color: var(--plan-color, #14b8a6); flex-shrink: 0; }
+.lp-feat-cross { color: #d1d5db; flex-shrink: 0; }
+.lp-pricing-feature span:nth-child(2) { flex: 1; }
+.lp-feat-value {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--plan-color-light, #e6fffc);
+  color: var(--plan-color, #0d9488);
+  white-space: nowrap;
+}
+
+/* CTA buttons */
+.lp-pricing-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.lp-pricing-cta--primary {
+  background: linear-gradient(135deg, #14b8a6, #006b5f);
+  color: #fff;
+}
+.lp-pricing-cta--primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(20,184,166,0.35);
+}
+.lp-pricing-cta--outline {
+  background: transparent;
+  color: #3c4947;
+  border: 1.5px solid #e2e8f0;
+}
+.lp-pricing-cta--outline:hover {
+  background: #f7f9fb;
+  border-color: #14b8a6;
+  color: #006b5f;
+}
+.lp-pricing-cta--gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+}
+.lp-pricing-cta--gold:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(245,158,11,0.35);
+}
+
+.lp-pricing-no-cc {
+  text-align: center;
+  font-size: 12px;
+  color: #b0b8b4;
+  margin-top: 10px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.lp-pricing-footnote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 48px;
+  padding: 16px 24px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 14px;
+  color: #3c4947;
+  font-family: 'Outfit', sans-serif;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  line-height: 1.6;
+}
+.lp-pricing-footnote svg { color: #14b8a6; flex-shrink: 0; }
+
 /* ---- FOOTER ---- */
 .lp-footer {
   background: #191c1e;
