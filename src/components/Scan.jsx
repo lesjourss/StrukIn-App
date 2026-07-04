@@ -1,7 +1,34 @@
 import React, { useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { parseReceiptOCR, MOCK_OCR } from '../lib/gemini';
-import { Camera, Image, Check, Plus, Trash2, ArrowRight, RefreshCw, Users, User } from 'lucide-react';
+import { Camera, Image, Check, Plus, Trash2, ArrowRight, RefreshCw, Users, User, CheckCircle, AlertCircle, X } from 'lucide-react';
+
+// ─── Custom Modal Component ────────────────────────────────────────────────
+function ScanModal({ modal, onClose }) {
+  if (!modal) return null;
+  const isSuccess = modal.type === 'success';
+  return (
+    <div style={modalStyles.overlay} onClick={onClose}>
+      <div style={modalStyles.box} onClick={(e) => e.stopPropagation()} className="animated-fade-in">
+        <div style={{ ...modalStyles.iconCircle, backgroundColor: isSuccess ? '#d1fae5' : '#fee2e2' }}>
+          {isSuccess
+            ? <CheckCircle size={36} color="#10b981" />
+            : <AlertCircle size={36} color="#ef4444" />}
+        </div>
+        <h3 style={{ ...modalStyles.title, color: isSuccess ? '#065f46' : '#991b1b' }}>
+          {modal.title}
+        </h3>
+        <p style={modalStyles.message}>{modal.message}</p>
+        <button
+          onClick={onClose}
+          style={{ ...modalStyles.closeBtn, backgroundColor: isSuccess ? '#10b981' : '#ef4444' }}
+        >
+          {isSuccess ? <><Check size={16} /> Oke, Lanjut!</> : <><X size={16} /> Tutup</>}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function Scan({ user, isDemo, onTransactionsSaved }) {
   const [file, setFile] = useState(null);
@@ -10,7 +37,18 @@ export default function Scan({ user, isDemo, onTransactionsSaved }) {
   const [parsedData, setParsedData] = useState(null);
   const [splitMode, setSplitMode] = useState('mine'); // 'mine' or 'split'
   const [numberOfPeople, setNumberOfPeople] = useState(2);
+  const [modal, setModal] = useState(null); // { type: 'success'|'error', title, message, onClose }
   const fileInputRef = useRef(null);
+
+  const showModal = (type, title, message, afterClose) => {
+    setModal({ type, title, message, afterClose });
+  };
+
+  const closeModal = () => {
+    const cb = modal?.afterClose;
+    setModal(null);
+    if (cb) cb();
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -38,7 +76,12 @@ export default function Scan({ user, isDemo, onTransactionsSaved }) {
       setParsedData(data);
     } catch (err) {
       console.error('Scan Error:', err);
-      alert(`Gagal mendeteksi nota belanja: ${err.message || err}\n\nMenggunakan data simulasi (mock) untuk demo.`);
+      showModal(
+        'error',
+        'Gagal Memindai Nota',
+        `Tidak dapat mendeteksi nota belanja: ${err.message || err}. Menggunakan data simulasi (mock) untuk demo.`,
+        () => {}
+      );
       setParsedData(MOCK_OCR);
     } finally {
       setScanning(false);
@@ -125,8 +168,12 @@ export default function Scan({ user, isDemo, onTransactionsSaved }) {
         created_at: new Date().toISOString()
       };
       onTransactionsSaved([mockSavedTx]);
-      resetScanState();
-      alert('Struk berhasil disimpan!');
+      showModal(
+        'success',
+        'Struk Tersimpan!',
+        'Transaksimu berhasil dicatat. Cek di halaman Riwayat untuk melihat detail.',
+        resetScanState
+      );
       return;
     }
 
@@ -151,8 +198,12 @@ export default function Scan({ user, isDemo, onTransactionsSaved }) {
 
       if (error) throw error;
       onTransactionsSaved([data]);
-      resetScanState();
-      alert('Struk berhasil disimpan!');
+      showModal(
+        'success',
+        'Struk Tersimpan!',
+        'Transaksimu berhasil dicatat. Cek di halaman Riwayat untuk melihat detail.',
+        resetScanState
+      );
     } catch (err) {
       console.error('Error saving scanned receipt:', err.message);
       // fallback
@@ -177,6 +228,7 @@ export default function Scan({ user, isDemo, onTransactionsSaved }) {
 
   return (
     <div style={styles.container} className="animated-fade-in">
+      <ScanModal modal={modal} onClose={closeModal} />
       {!parsedData && !scanning && (
         <div className="card" style={styles.uploadCard}>
           <div style={styles.iconCircleBig}>
@@ -701,6 +753,45 @@ const styles = {
     color: 'var(--color-primary-dark)',
     fontWeight: '800',
   }
+};
+
+// ─── Modal Styles ────────────────────────────────────────────────────────────
+const modalStyles = {
+  overlay: {
+    position: 'fixed', inset: 0, zIndex: 9999,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backdropFilter: 'blur(4px)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    padding: '24px',
+  },
+  box: {
+    backgroundColor: 'var(--bg-secondary)',
+    borderRadius: '24px',
+    padding: '36px 32px',
+    maxWidth: '380px',
+    width: '100%',
+    textAlign: 'center',
+    boxShadow: '0 24px 64px rgba(0,0,0,0.25)',
+    border: '1px solid var(--border-color)',
+  },
+  iconCircle: {
+    width: '72px', height: '72px', borderRadius: '50%',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    margin: '0 auto 20px',
+  },
+  title: {
+    fontSize: '20px', fontWeight: '800', marginBottom: '10px',
+  },
+  message: {
+    fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '24px',
+  },
+  closeBtn: {
+    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+    color: 'white', border: 'none', borderRadius: '14px',
+    padding: '14px 32px', fontSize: '15px', fontWeight: '700',
+    cursor: 'pointer', width: '100%', fontFamily: 'inherit',
+    transition: 'opacity 0.2s',
+  },
 };
 // Mount global styles dynamically to enable CSS animation on component load
 if (typeof document !== 'undefined') {

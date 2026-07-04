@@ -3,10 +3,10 @@ import { supabase } from '../lib/supabaseClient';
 import {
   User, Mail, Shield, Flame, LogOut, Save, Check,
   GraduationCap, Heart, UserCheck, ChevronRight,
-  Wallet, Sparkles, AlertTriangle, X, CreditCard, History
+  Wallet, Sparkles, AlertTriangle, X, CreditCard, History, Trash2
 } from 'lucide-react';
 
-export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, onLogout, setActiveTab }) {
+export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, onLogout, onDeleteAccount, deletingAccount, setActiveTab }) {
   const [monthlyLimit, setMonthlyLimit] = useState(profile?.monthly_limit || 0);
   const [aiCharacter, setAiCharacter] = useState(profile?.ai_character || 'Dosen Killer');
   const [aiSpiciness, setAiSpiciness] = useState(profile?.ai_spiciness || 'Sedang');
@@ -16,6 +16,8 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
   const [showSettings, setShowSettings] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [showTopUp, setShowTopUp] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   useEffect(() => {
     const handleResize = () => {
@@ -46,9 +48,9 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
   ];
 
   const spicinesses = [
-    { id: 'Manis', label: '🍬 Manis', desc: 'Kritik lembut & sopan' },
-    { id: 'Sedang', label: '🌶️ Sedang', desc: 'Balanced & to the point' },
-    { id: 'Pedes Mampus', label: '🔥 Pedes Mampus', desc: 'Jujur sadis tanpa filter' },
+    { id: 'Manis', label: ' Manis', desc: 'Kritik lembut & sopan' },
+    { id: 'Sedang', label: ' Sedang', desc: 'Balanced & to the point' },
+    { id: 'Pedes Mampus', label: ' Pedes Mampus', desc: 'Jujur sadis tanpa filter' },
   ];
 
   const handleTopUp = async () => {
@@ -82,8 +84,64 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Pengguna';
   const avatarLetter = (user?.user_metadata?.full_name || user?.email || 'U')[0].toUpperCase();
 
+  const canConfirmDelete = deleteConfirmText.trim().toUpperCase() === 'HAPUS';
+
+  const handleConfirmDelete = () => {
+    if (!canConfirmDelete) return;
+    setShowDeleteModal(false);
+    setDeleteConfirmText('');
+    onDeleteAccount();
+  };
+
   return (
     <div style={styles.page} className="animated-fade-in">
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div style={deleteModalStyles.overlay} onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}>
+          <div style={deleteModalStyles.box} onClick={(e) => e.stopPropagation()} className="animated-fade-in">
+            <div style={deleteModalStyles.iconCircle}>
+              <Trash2 size={32} color="#ef4444" />
+            </div>
+            <h3 style={deleteModalStyles.title}>Hapus Akun Permanen</h3>
+            <p style={deleteModalStyles.message}>
+              Tindakan ini <strong>tidak bisa dibatalkan</strong>. Semua data transaksi,
+              riwayat scan, dan profil akan dihapus selamanya.
+            </p>
+            <div style={deleteModalStyles.warningBox}>
+              <AlertTriangle size={14} color="#92400e" />
+              <span>Data yang sudah dihapus tidak bisa dipulihkan.</span>
+            </div>
+            <label style={deleteModalStyles.label}>
+              Ketik <strong>HAPUS</strong> untuk mengkonfirmasi:
+            </label>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Ketik HAPUS di sini"
+              style={deleteModalStyles.input}
+              autoFocus
+            />
+            <div style={deleteModalStyles.btnRow}>
+              <button
+                onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
+                style={deleteModalStyles.cancelBtn}
+              >
+                <X size={15} /> Batal
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={!canConfirmDelete || deletingAccount}
+                style={{ ...deleteModalStyles.deleteBtn, opacity: canConfirmDelete ? 1 : 0.4 }}
+              >
+                <Trash2 size={15} />
+                {deletingAccount ? 'Menghapus...' : 'Ya, Hapus Akun'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {/* Header */}
@@ -149,6 +207,15 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
           >
             <LogOut size={16} />
             <span>Keluar dari Akun</span>
+          </button>
+
+          {/* Tombol Hapus Akun (Mobile) */}
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            style={styles.mobileDeleteBtn}
+          >
+            <Trash2 size={16} />
+            <span>Hapus Akun</span>
           </button>
         </div>
       ) : (
@@ -402,6 +469,24 @@ export default function ProfilePage({ user, profile, isDemo, onProfileUpdated, o
                 <><Save size={18} /> Simpan Perubahan</>
               )}
             </button>
+
+            {/* Danger Zone Card */}
+            <div className="card" style={styles.dangerCard}>
+              <div style={styles.settingHeader}>
+                <AlertTriangle size={20} color="#ef4444" />
+                <div>
+                  <h4 style={{ ...styles.settingTitle, color: '#ef4444' }}>Zona Berbahaya</h4>
+                  <p style={styles.settingDesc}>Tindakan ini bersifat permanen dan tidak bisa diurungkan</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                style={styles.dangerBtn}
+              >
+                <Trash2 size={16} />
+                Hapus Akun Selamanya
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -654,5 +739,123 @@ const styles = {
     flexDirection: 'column',
     gap: '16px',
   },
+
+  // Mobile delete button
+  mobileDeleteBtn: {
+    width: '100%',
+    padding: '14px',
+    borderRadius: '12px',
+    border: '2px solid #fee2e2',
+    backgroundColor: '#fff5f5',
+    color: '#ef4444',
+    fontWeight: '700',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontSize: '14px',
+    transition: 'all 0.2s',
+    marginTop: '8px',
+    fontFamily: 'inherit',
+  },
+
+  // Danger Zone card (desktop)
+  dangerCard: {
+    padding: '24px',
+    border: '2px solid #fee2e2',
+    backgroundColor: '#fff5f5',
+  },
+  dangerBtn: {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: '10px',
+    border: '2px solid #ef4444',
+    backgroundColor: 'transparent',
+    color: '#ef4444',
+    fontWeight: '700',
+    fontSize: '14px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    transition: 'all 0.2s',
+    fontFamily: 'inherit',
+  },
 };
+
+// ─── Delete Account Modal Styles ─────────────────────────────────────────────
+const deleteModalStyles = {
+  overlay: {
+    position: 'fixed', inset: 0, zIndex: 9999,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    backdropFilter: 'blur(6px)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    padding: '24px',
+  },
+  box: {
+    backgroundColor: 'var(--bg-secondary)',
+    borderRadius: '24px',
+    padding: '36px 28px',
+    maxWidth: '420px',
+    width: '100%',
+    textAlign: 'center',
+    boxShadow: '0 24px 64px rgba(239,68,68,0.2)',
+    border: '2px solid #fee2e2',
+  },
+  iconCircle: {
+    width: '72px', height: '72px', borderRadius: '50%',
+    backgroundColor: '#fee2e2',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    margin: '0 auto 20px',
+  },
+  title: {
+    fontSize: '20px', fontWeight: '800', color: '#991b1b', marginBottom: '10px',
+  },
+  message: {
+    fontSize: '14px', color: 'var(--text-muted)', lineHeight: '1.7', marginBottom: '16px',
+    textAlign: 'left',
+  },
+  warningBox: {
+    display: 'flex', alignItems: 'center', gap: '8px',
+    backgroundColor: '#fef3c7', borderRadius: '10px',
+    padding: '10px 14px', marginBottom: '20px',
+    fontSize: '12px', fontWeight: '600', color: '#92400e',
+    textAlign: 'left',
+  },
+  label: {
+    display: 'block', fontSize: '13px', fontWeight: '700',
+    color: 'var(--text-main)', marginBottom: '8px', textAlign: 'left',
+  },
+  input: {
+    width: '100%', padding: '12px 14px',
+    borderRadius: '10px', border: '2px solid #ef4444',
+    fontSize: '15px', fontWeight: '700', textAlign: 'center',
+    outline: 'none', fontFamily: 'inherit',
+    backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)',
+    marginBottom: '20px', boxSizing: 'border-box',
+    letterSpacing: '2px',
+  },
+  btnRow: {
+    display: 'flex', gap: '10px',
+  },
+  cancelBtn: {
+    flex: 1, padding: '12px', borderRadius: '10px',
+    border: '2px solid var(--border-color)',
+    backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-main)',
+    fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+    fontFamily: 'inherit',
+  },
+  deleteBtn: {
+    flex: 1.5, padding: '12px', borderRadius: '10px',
+    border: 'none', backgroundColor: '#ef4444', color: 'white',
+    fontWeight: '700', fontSize: '14px', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+    transition: 'opacity 0.2s', fontFamily: 'inherit',
+  },
+};
+
+
 

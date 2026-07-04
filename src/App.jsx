@@ -19,6 +19,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Check if Supabase is properly configured
   const isSupabaseConfigured = () => {
@@ -187,6 +188,36 @@ export default function App() {
     }
     setActiveTab('Home');
     setShowLanding(true);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!sessionUser) return;
+    setDeletingAccount(true);
+    try {
+      if (isDemo) {
+        // Clear all local demo data
+        localStorage.removeItem('demo_user');
+        localStorage.removeItem(`profile_${sessionUser.id}`);
+        localStorage.removeItem(`tx_${sessionUser.id}`);
+      } else {
+        // Delete all user data from Supabase
+        await supabase.from('transactions').delete().eq('user_id', sessionUser.id);
+        await supabase.from('scanned_receipts').delete().eq('user_id', sessionUser.id);
+        await supabase.from('profiles').delete().eq('id', sessionUser.id);
+        // Sign out (Supabase doesn't support self-delete via client SDK directly)
+        await supabase.auth.signOut();
+      }
+      setSessionUser(null);
+      setProfile(null);
+      setTransactions([]);
+      setActiveTab('Home');
+      setShowLanding(true);
+    } catch (err) {
+      console.error('Failed to delete account:', err);
+      alert('Gagal menghapus akun. Coba lagi nanti.');
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   const handleTransactionAdded = (newTx) => {
@@ -369,6 +400,8 @@ export default function App() {
               await handleUpdateProfileSettings(settings);
             }}
             onLogout={() => setShowLogoutConfirm(true)}
+            onDeleteAccount={handleDeleteAccount}
+            deletingAccount={deletingAccount}
             setActiveTab={setActiveTab}
           />
         )}
