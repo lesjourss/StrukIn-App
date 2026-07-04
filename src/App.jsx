@@ -200,13 +200,27 @@ export default function App() {
         localStorage.removeItem(`profile_${sessionUser.id}`);
         localStorage.removeItem(`tx_${sessionUser.id}`);
       } else {
-        // Delete all user data from Supabase
-        await supabase.from('transactions').delete().eq('user_id', sessionUser.id);
-        await supabase.from('scanned_receipts').delete().eq('user_id', sessionUser.id);
-        await supabase.from('profiles').delete().eq('id', sessionUser.id);
-        // Sign out (Supabase doesn't support self-delete via client SDK directly)
+        // Get current session JWT to authenticate the server request
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) throw new Error('Sesi tidak ditemukan.');
+
+        const response = await fetch('/api/delete-account', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (!response.ok || result.error) {
+          throw new Error(result.message || 'Gagal menghapus akun dari server.');
+        }
+
+        // Sign out locally after server deletes the account
         await supabase.auth.signOut();
       }
+
       setSessionUser(null);
       setProfile(null);
       setTransactions([]);
@@ -214,11 +228,12 @@ export default function App() {
       setShowLanding(true);
     } catch (err) {
       console.error('Failed to delete account:', err);
-      alert('Gagal menghapus akun. Coba lagi nanti.');
+      alert(`Gagal menghapus akun: ${err.message}`);
     } finally {
       setDeletingAccount(false);
     }
   };
+
 
   const handleTransactionAdded = (newTx) => {
     const updatedTx = [newTx, ...transactions];
