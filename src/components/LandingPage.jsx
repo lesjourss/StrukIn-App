@@ -66,7 +66,11 @@ export default function LandingPage({ onGetStarted }) {
               Coba Gratis <ArrowRight size={16} />
             </button>
           </div>
-          <button className="lp-hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+          <button
+            className={`lp-hamburger ${menuOpen ? 'open' : ''}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
             <span /><span /><span />
           </button>
         </div>
@@ -129,7 +133,7 @@ export default function LandingPage({ onGetStarted }) {
                 <p>{f.desc}</p>
                 {f.title === 'AI Roasting' && (
                   <div className="lp-feature-quote">
-                    "Beli skincare lagi? Muka glowing tapi dompet burning nih bos! 🧴"
+                    "Beli skincare lagi? Muka glowing tapi dompet burning nih bos!"
                   </div>
                 )}
               </div>
@@ -224,7 +228,17 @@ export default function LandingPage({ onGetStarted }) {
                   {f.q}
                   <ChevronDown size={18} className="lp-faq-chevron" />
                 </button>
-                {openFaq === i && <div className="lp-faq-a">{f.a}</div>}
+              <div
+                className="lp-faq-a-wrap"
+                style={{
+                  maxHeight: openFaq === i ? '400px' : '0',
+                  opacity: openFaq === i ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'max-height 0.35s ease, opacity 0.25s ease',
+                }}
+              >
+                <div className="lp-faq-a">{f.a}</div>
+              </div>
               </div>
             ))}
           </div>
