@@ -789,8 +789,8 @@ const styles = {
 const deleteModalStyles = {
   overlay: {
     position: 'fixed', inset: 0, zIndex: 9999,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    backdropFilter: 'blur(6px)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: '24px',
   },
