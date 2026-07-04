@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { ReceiptText, ShieldCheck } from 'lucide-react';
+import { ReceiptText, ShieldCheck, ChevronLeft } from 'lucide-react';
 
-export default function Auth({ onAuthSuccess }) {
+export default function Auth({ onAuthSuccess, onBackToLanding }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -26,6 +26,12 @@ export default function Auth({ onAuthSuccess }) {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
+        {onBackToLanding && (
+          <button type="button" onClick={onBackToLanding} style={styles.backLink}>
+            <ChevronLeft size={16} /> Kembali ke beranda
+          </button>
+        )}
+
         {/* Logo */}
         <div style={styles.logoWrap}>
           <div style={styles.logoIcon}>
@@ -181,5 +187,20 @@ const styles = {
     marginTop: '20px',
     fontSize: '12px',
     color: 'var(--text-muted)',
+  },
+  backLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-muted)',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    marginBottom: '20px',
+    padding: 0,
+    fontFamily: 'inherit',
+    WebkitTapHighlightColor: 'transparent',
   },
 };

@@ -94,7 +94,7 @@ function calcPersona(answers) {
   return Object.entries(count).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
+export default function Onboarding({ user, isDemo, onOnboardingComplete, onBackToLanding }) {
   const [step, setStep] = useState(0); // 0=budget, 1=quiz, 2=result, 3=spicy
   const [limit, setLimit] = useState(0);
   const [answers, setAnswers] = useState(Array(5).fill(null)); // jawaban per soal
@@ -183,6 +183,12 @@ export default function Onboarding({ user, isDemo, onOnboardingComplete }) {
   return (
     <div style={styles.container} className="animated-fade-in">
       <div style={styles.card}>
+
+        {onBackToLanding && (
+          <button type="button" onClick={onBackToLanding} style={styles.exitLink}>
+            <ChevronLeft size={16} /> Kembali ke beranda
+          </button>
+        )}
 
         {/* Progress Bar */}
         <div style={styles.progressWrap}>
@@ -496,5 +502,11 @@ const styles = {
     background: 'none', border: 'none', color: 'var(--text-muted)',
     fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginTop: '12px',
     width: '100%', WebkitTapHighlightColor: 'transparent',
+  },
+  exitLink: {
+    display: 'flex', alignItems: 'center', gap: '4px',
+    background: 'none', border: 'none', color: 'var(--text-muted)',
+    fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginBottom: '16px',
+    padding: 0, fontFamily: 'inherit', WebkitTapHighlightColor: 'transparent',
   },
 };

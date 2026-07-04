@@ -186,6 +186,7 @@ export default function App() {
       await supabase.auth.signOut();
     }
     setActiveTab('Home');
+    setShowLanding(true);
   };
 
   const handleTransactionAdded = (newTx) => {
@@ -241,7 +242,12 @@ export default function App() {
     if (showLanding) {
       return <LandingPage onGetStarted={() => setShowLanding(false)} />;
     }
-    return <Auth onAuthSuccess={handleAuthSuccess} />;
+    return (
+      <Auth
+        onAuthSuccess={handleAuthSuccess}
+        onBackToLanding={() => setShowLanding(true)}
+      />
+    );
   }
 
   // Onboarding (First time setup)
@@ -251,6 +257,7 @@ export default function App() {
         user={sessionUser}
         isDemo={isDemo}
         onOnboardingComplete={handleOnboardingComplete}
+        onBackToLanding={handleLogout}
       />
     );
   }
